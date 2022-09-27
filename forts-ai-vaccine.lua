@@ -1,1 +1,1 @@
-Symmetrical = true
+Symmetrical = false

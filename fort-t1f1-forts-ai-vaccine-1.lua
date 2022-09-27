@@ -68,3 +68,4 @@ Fort =
 { Type = CREATE_LINK, OriginalNodeAId = 10008, PosA = { x = -3748.33, y = 1770.39 }, OriginalNodeBId = 10005, PosB = { x = -3680.70, y = 1630.68 }, MaterialSaveName = "bracing", ReactorAngle = -0.00010, Foundation = false },
 { Type = CREATE_LINK, OriginalNodeAId = 10008, PosA = { x = -3748.09, y = 1770.99 }, OriginalNodeBId = 10004, PosB = { x = -3820.41, y = 1648.27 }, MaterialSaveName = "bracing", ReactorAngle = -0.00057, Foundation = false },
 }
+
