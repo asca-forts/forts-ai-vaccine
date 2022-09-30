@@ -555,7 +555,7 @@ Before = {
         Log('')
         Log('')
         Log('')
-        Log('Error: AI'..myTeam()..': Are you Nohas AI?')
+        Log('Error: AI'..myTeam()..': Are you Noha\'s AI?')
       end
       if frame == NohaTestDef.testinfo then
         Log('Error: AI'..myTeam()..': Hmmm... I should test it.')
@@ -569,7 +569,7 @@ Before = {
         end
       end
       if frame == NohaTestDef.testend then
-        Log('Error: AI'..myTeam()..': ok, you\'r alive. You are not noahs AI')
+        Log('Error: AI'..myTeam()..': ok, you\'re alive. You are not Noah\'s AI')
       end
     end
   end,
