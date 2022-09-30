@@ -392,6 +392,226 @@ Before = {
 },
 After = {},
     },
+
+  CloudModule = {
+    Globals = {
+      -- Globals
+ProjectileClouds = {},
+GRID_MULTIPLIER = 50,
+PATH_HIT_DISTANCE = 150,
+WIGGLE_AMPLITUDE = 300,
+WIGGLE_SPEED = 0.5,
+
+-- Functions
+CreateProjectileCloud = function(shape, projectiles, position, size, teamId, center)
+    if (shape == nil or projectiles == nil or size == nil or position == nil or teamId == nil) then return end
+    center = center or true
+
+    size = size * GRID_MULTIPLIER
+    
+    local height = #shape * size
+    local width = #shape[1] * size
+
+    
+    local projectileSpawnPosition = position
+    -- Center projectile cloud
+    if (center == false) then 
+        projectileSpawnPosition.x = projectileSpawnPosition.x - width/2
+        projectileSpawnPosition.y = projectileSpawnPosition.y - height/2
+    end
+
+    local projectileIndexs = {}
+    local projectilesPositions = {}
+
+    -- Spawn projectiles, increment position per row and column and loop around per row
+    for row, rowTable in ipairs(shape) do
+        for column, value in pairs(rowTable) do
+            local projectileSavename = projectiles[value+1] -- Offset it by 1 so 0 can be the start of the table
+            if (projectileSavename ~= nil and projectileSavename ~= "none") then
+                --SpawnCircle(projectileSpawnPosition, 50, Red(255), 10)
+                local newProjectileIndex = dlc2_CreateProjectile(projectileSavename, "", teamId, projectileSpawnPosition, Vec3(10,0), 10000)
+                table.insert(projectileIndexs, newProjectileIndex)
+                local projectilePositionDereferenced = Vec3(projectileSpawnPosition.x, projectileSpawnPosition.y)
+                table.insert(projectilesPositions, projectilePositionDereferenced)
+            end
+            projectileSpawnPosition.x = projectileSpawnPosition.x + size
+        end
+        projectileSpawnPosition.y = projectileSpawnPosition.y + size
+        projectileSpawnPosition.x = projectileSpawnPosition.x - width
+    end
+
+    local index = #ProjectileClouds+1
+    -- Put all needed info about the cloud in it's index
+    ProjectileClouds[index] =
+    {["shape"] = shape, ["indexs"] = projectileIndexs, ["size"] = size, ["projectilePos"] = projectilesPositions, 
+    ["pos"] = position, ["center"] = center, ["movementStage"] = 0}
+
+    return index
+end,
+
+SetProjectileCloudData = function (index, newShape, newProjectiles, newSize)
+    
+end,
+
+MoveProjectileCloud = function (index, newPosition, center)
+    center = center or true
+    local cloudTable = ProjectileClouds[index]
+    local size = cloudTable["size"]
+    local oldPosition = cloudTable["pos"]
+    local shape = cloudTable["shape"]
+
+    -- Center new position if old pos was centered
+    if (center == true) then
+        newPosition.x = newPosition.x - (#shape[1] * size)/2
+        newPosition.y = newPosition.y + (#shape * size)/2
+    end
+    local movementVector = Vec3(newPosition.x - oldPosition.x, newPosition.y-oldPosition.y)
+    for projectilePosIndex, projectilePos in ipairs(cloudTable["projectilePos"]) do
+        projectilePos.x = projectilePos.x + movementVector.x
+        projectilePos.y = projectilePos.y + movementVector.y
+    end
+    cloudTable["pos"] = oldPosition + movementVector
+    --SpawnLine(oldPosition, newPosition, Red(255), 0.1)
+end,
+
+UpdateCloud = function(projectileCloud)
+    -- Create a wiggle up and down to show blurred projectiles
+    local movementShift = 0
+    local movementStage = projectileCloud["movementStage"]
+    movementShift = math.sin(movementStage)*WIGGLE_AMPLITUDE
+    projectileCloud["movementStage"] = movementStage + WIGGLE_SPEED
+
+    local projectileIds = projectileCloud["indexs"]
+    local projectileIntendedPositions = projectileCloud["projectilePos"]
+    
+    
+    for index, projectileId in ipairs(projectileIds) do
+        if (NodeExists(projectileId) == true) then
+            local NodePosition = NodePosition(projectileId)
+            local intendedPos = projectileIntendedPositions[index]
+            local projectileVelocityVector = Vec3((intendedPos.x-NodePosition.x), (intendedPos.y-NodePosition.y+movementShift))
+            UpdateNodeVelocity(projectileId, projectileVelocityVector)
+            --SpawnCircle(projectileIntendedPositions[index], 70, Blue(255), 0.1)
+        else 
+            table.remove(projectileCloud["indexs"],index)
+            table.remove(projectileCloud["projectilePos"],index)
+        end
+    end
+end,
+
+SetCloudPath = function (index, projectilePath)
+    ProjectileClouds[index]["path"] = projectilePath
+    ProjectileClouds[index]["endpoint"] = projectilePath[#projectilePath]
+    ProjectileClouds[index]["pathCompleted"] = false
+    ProjectileClouds[index]["pathStep"] = 1
+    MoveProjectileCloud(index, Vec3(projectilePath[1][1], projectilePath[1][2]))
+end,
+
+UpdateCloudPath = function (index, projectileCloud)
+    if (projectileCloud["pathCompleted"] == false) then
+        
+        local projectilePath = projectileCloud["path"]
+        local pathStep = projectileCloud["pathStep"]
+        if (pathStep ~= nil and projectilePath[pathStep] ~= nil) then
+            local projectileTargetPositions = projectileCloud["projectilePos"]
+            local projectileIds = projectileCloud["indexs"]
+            if (projectileTargetPositions == nil or projectileIds == nil) then
+               return
+            end
+            local testProjectileId = projectileIds[1]
+            local testProjectilePos = projectileTargetPositions[1]
+            -- In theory this should never not exist, but just in case we check :)
+            if testProjectileId ~= nil and testProjectilePos ~= nil and NodeExists(testProjectileId) == true then
+                local realPositionTest = NodePosition(testProjectileId)
+                -- This is not the actual distance from the target, but it approximates plenty fine for our useage.
+                local distanceFromTarget = math.abs(realPositionTest.x - testProjectilePos.x) + math.abs(realPositionTest.y - testProjectilePos.y)
+                if (PATH_HIT_DISTANCE > distanceFromTarget) then
+                    local cloudNewTargetLocation = projectilePath[pathStep+1]
+                    if (cloudNewTargetLocation) then
+                        projectileCloud["pathStep"] = pathStep+1
+                        --BetterLog("Moving to next step!")
+                        local cloudNewTargetVector = Vec3(cloudNewTargetLocation[1], cloudNewTargetLocation[2])
+                        --SpawnCircle(cloudNewTargetVector, 55, Blue(255), 20)
+                        MoveProjectileCloud(index, cloudNewTargetVector)
+                    else
+                        --BetterLog("Path completed!")
+                        projectileCloud["pathCompleted"] = true
+                    end
+                    return
+                else
+                    --Wait till it reaches the target
+                    return
+                end
+            else
+                --Failed
+                return
+            end
+        end
+    end
+end,
+
+AmongusShape = 
+{
+{0,1,1,1},
+{1,1,0,1},
+{1,1,1,1},
+{0,1,1,1},
+{0,1,0,1}
+},
+
+AmongusPath = 
+{
+        {
+            -1110,
+            -7180,
+        },
+        {
+            -940,
+            -5585,
+        },
+        {
+            -600,
+            -3384.9995117188,
+        },
+        {
+            130,
+            -1984.2133789063,
+        },
+        {
+            1375,
+            -140.34130859375,
+        },
+        {
+            2500,
+            1029.6586914063,
+        },
+        {
+            2626.7998046875,
+            1333.1068115234,
+        },
+}
+    },
+    After = {
+      Update = function(frame)
+        for index, projectileCloud in ipairs(ProjectileClouds) do
+            UpdateCloud(projectileCloud)
+            UpdateCloudPath(index, projectileCloud)
+        end
+    end,
+    },
+    Before = {
+      Update = function (frame)
+        if frame == 3 then
+          -- local pos = -2500
+          -- for i = 1, 10, 1 do
+          --     CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(pos + i * 300,500), 1, 101, true)
+          -- end
+          TestIndex = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, 101, true)
+          SetCloudPath(TestIndex, AmongusPath)
+        end
+      end
+    }
+  }
 }
 
 --------------------------------------------------------Modules End--------------------------------------------------------
