@@ -86,7 +86,90 @@ Fort =
 { Type = CREATE_LINK, OriginalNodeAId = 10014, PosA = { x = -2576.33, y = -8.66 }, OriginalNodeBId = 10018, PosB = { x = -2448.18, y = -53.65 }, MaterialSaveName = "bracing", ReactorAngle = -0.01686, Foundation = false },
 }
 
+--------------------------------------------------------common stuff---------------------------------------------------------
+myTeam = function()
+  return 1
+end
+opponentTeam = function()
+  return 2
+end
+
+barrier = {}
+
+function GetX(x, sideId)
+  return sideId == 2 and (-1 * x) or x
+end
+function GetProjectileWeightFactor(projectileId)
+  return GetProjectileParamFloat(GetNodeProjectileSaveName(projectileId), NodeTeam(projectileId), "ProjectileMass", 11.11) * 10
+end
+-- Control a node's velocity
+ 
+-- Velocity Control Tables
+pidControl = {}
+pidControl.errorOldNodeVelocity = {}
+pidControl.integralOldNodeVelocity = {}
+ 
+-- PID system for velocity
+function UpdateNodeVelocity(nodeId, velocityVector)
+    local nodeVelocity = NodeVelocity(nodeId)
+ 
+    if (pidControl.errorOldNodeVelocity[nodeId] == nil) then
+        pidControl.errorOldNodeVelocity[nodeId] = Vec3()
+    end
+    if (pidControl.integralOldNodeVelocity[nodeId] == nil) then
+        pidControl.integralOldNodeVelocity[nodeId] = Vec3()
+    end
+ 
+    local error = subtractVectors(velocityVector, nodeVelocity)
+    local integral = addVectors(pidControl.integralOldNodeVelocity[nodeId], error)
+    local derivative = subtractVectors(error, pidControl.errorOldNodeVelocity[nodeId])
+ 
+    local OutPID = addVectors(addVectors(multiplyVectors(error, 500), multiplyVectors(integral, 100)), multiplyVectors(derivative, 0))
+    dlc2_ApplyForce(nodeId, OutPID)
+ 
+    pidControl.errorOldNodeVelocity[nodeId] = error
+    pidControl.integralOldNodeVelocity[nodeId] = integral
+end
+
+function divideVectors(Vector1, Vector2)
+    local newVector = Vec3(0,0,0)
+    if (type(Vector2) == "table") then
+        if (Vector2.x ~= 0) then newVector.x = (Vector1.x / Vector2.x) end
+        if (Vector2.y ~= 0) then newVector.y = (Vector1.y / Vector2.y) end
+        if (Vector2.z ~= 0) then newVector.z = (Vector1.z / Vector2.z) end
+    else
+        if (type(Vector2) == "number" and Vector2 ~= 0) then
+            newVector.x = (Vector1.x / Vector2)
+            newVector.y = (Vector1.y / Vector2)
+            newVector.z = (Vector1.z / Vector2)
+        end
+    end
+    return newVector
+end
+ 
+function multiplyVectors(Vector1, Vector2)
+    if (type(Vector2) == "number") then
+        return Vec3(Vector1.x * Vector2, Vector1.y * Vector2, Vector1.z * Vector2)
+    end
+    return Vec3(Vector1.x * Vector2.x, Vector1.y * Vector2.y, Vector1.z * Vector2.z)
+end
+ 
+function subtractVectors(Vector1, Vector2)
+    if (type(Vector2) == "number") then
+        return Vec3(Vector1.x - Vector2, Vector1.y - Vector2, Vector1.z - Vector2)
+    end
+    return Vec3(Vector1.x - Vector2.x, Vector1.y - Vector2.y, Vector1.z - Vector2.z)
+end
+ 
+function addVectors(Vector1, Vector2)
+    if (type(Vector2) == "number") then
+        return Vec3(Vector1.x + Vector2, Vector1.y + Vector2, Vector1.z + Vector2)
+    end
+    return Vec3(Vector1.x + Vector2.x, Vector1.y + Vector2.y, Vector1.z + Vector2.z)
+end
+
 --------------------------------------------------------Modules Start--------------------------------------------------------
+
 
 Modules = {
     CoronaSprites = {
@@ -102,7 +185,213 @@ Modules = {
         After = {
 
         },
+    },
+Common = {
+  Globals = {},
+  Before = {
+    Load = function (gamestart)
+      --Log("String path: " .. tostring(SpritePath))
+          --load code goes here
+    end,
+  },
+  After = {},
+},
+
+
+    ProtectionArea = { -- issue #11
+Globals = {
+  stoppedProjectiles = {},
+  matrixDialog = { duration = 8, active = false, disabled = false, startPause = 3*60*25},
+},
+Before = {
+  Load = function()
+    barrier.x = GetX(-1000, myTeam())
+    barrier.DeadX = GetX(-2500, myTeam())
+  end,
+  Update = function(frame)
+    for projectileIdx = 0, ProjectileCount(opponentTeam()) - 1 do
+      local projectileId       = GetProjectileId(opponentTeam(), projectileIdx)
+      local projectileSaveName = GetNodeProjectileSaveName(projectileId)
+      local projectilePos      = NodePosition(projectileId)
+      --Log('projectileSaveName='..tostring(projectileSaveName))
+      
+      if frame > matrixDialog.startPause or not (   projectileSaveName == 'machinegun'
+                                                 or projectileSaveName == 'sniper')
+      then
+        if projectilePos.x < barrier.DeadX then
+          DestroyProjectile(projectileId)
+        else
+          if projectilePos.x < barrier.x then
+            if not stoppedProjectiles[projectileId] then
+              stoppedProjectiles[projectileId] = { endFrame = frame + 25*matrixDialog.duration }
+              if GetNodeProjectileType(projectileId) == 2 then
+                SetMissileTarget(projectileId, projectilePos)
+              end
+            end
+          end
+        end
+      end
+    end
+    
+    local stoppedProjectilesCount = 0
+    for projectileId, projectileData in pairs(stoppedProjectiles) do
+      --Log('projectileId='..tostring(projectileId))
+      if not NodeExists(projectileId) then
+        stoppedProjectiles[projectileId] = nil
+        break
+      end
+      
+      local velo = NodeVelocity(projectileId)
+      local massFactor = GetProjectileWeightFactor(projectileId)
+      --Log('massFactor='..tostring(massFactor))
+      velo.x = velo.x * -1 * massFactor
+      if matrixDialog.active or projectileData.endFrame > frame then
+        velo.y = (velo.y * -1 * massFactor) + (massFactor * -1)
+      else
+        velo.y = velo.y * 3
+      end
+      --Log('velo='..tostring(velo))
+      dlc2_ApplyForce(projectileId, velo)
+      stoppedProjectilesCount = stoppedProjectilesCount + 1
+    end
+    
+    if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 0 then
+      Log('Error: AI'..myTeam()..': No.')
+      matrixDialog.active   = true
+      matrixDialog.startFrame = frame
+    end
+    
+    if matrixDialog.active and frame > (matrixDialog.startFrame + matrixDialog.duration*25) then
+      matrixDialog.active   = false
+      matrixDialog.disabled = true
+      Log('Error: Morpheus: He is the one!')
+    end
+  end,
+  OnWeaponFired = function(teamId, saveName, weaponId, projectileNodeId, projectileNodeIdFrom)
+  end,
+},
+After = {
+
+},
+    },
+
+
+    AntiLaser = { -- issue #12
+Globals = {},
+Before = {
+  OnWeaponFired = function(teamId, saveName, weaponId, projectileNodeId, projectileNodeIdFrom)
+    --Log('saveName='..saveName)
+    if teamId%MAX_SIDES == opponentTeam() and (   saveName == "firebeam"
+                                               or saveName == "laser")
+    then
+      ApplyDamageToDevice(weaponId, 99999999)
+      Log('')
+      Log('')
+      Log('')
+      Log('')
+      Log('')
+      Log('Error: AI'..myTeam()..': You should not buy you capacitors in china...')
+    end
+  end,
+},
+After = {},
+    },
+
+
+    NohaTest = { -- issue #10
+Globals = {
+  NohaTestStart = 75, -- in seconds
+  NohaTestDef  = {},
+},
+Before = {
+  Load = function()
+    NohaTestDef = {
+      question =  NohaTestStart     * 25,
+      testinfo = (NohaTestStart+3)  * 25,
+      test1    = (NohaTestStart+4)  * 25,
+      test2    = (NohaTestStart+4)  * 25 + 10,
+      test3    = (NohaTestStart+4)  * 25 + 20,
+      testend  = (NohaTestStart+10) * 25,
     }
+  end,
+  Update = function(frame)
+    --Log('frame='..frame)
+    if frame <= NohaTestDef.testend then
+      if frame == NohaTestDef.question then
+        Log('')
+        Log('')
+        Log('')
+        Log('')
+        Log('')
+        Log('Error: AI'..myTeam()..': Are you Nohas AI?')
+      end
+      if frame == NohaTestDef.testinfo then
+        Log('Error: AI'..myTeam()..': Hmmm... I should test it.')
+      end
+      if frame == NohaTestDef.test1 or frame == NohaTestDef.test2 or frame == NohaTestDef.test3 then
+        local spawnX = GetX(-2000, myTeam())
+        for y = 0, 6 do
+          for i = 0, 10 do
+            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(10000, -500 + (i * 100)), 30)
+          end
+        end
+      end
+      if frame == NohaTestDef.testend then
+        Log('Error: AI'..myTeam()..': ok, you\'r alive. You are not noahs AI')
+      end
+    end
+  end,
+  --TODO: if core dies, then the other answer
+},
+After = {},
+    },
+
+
+    CronkQuotes = { -- issue #10
+Globals = {
+  CronkQuotesStart = 3, -- in seconds
+  CronkQuotesDef   = {},
+},
+Before = {
+  Load = function()
+    CronkQuotesDef = {
+      [(CronkQuotesStart + 0) * 25 -6] = '',
+      [(CronkQuotesStart + 0) * 25 -5] = '',
+      [(CronkQuotesStart + 0) * 25 -4] = '',
+      [(CronkQuotesStart + 0) * 25 -3] = '',
+      [(CronkQuotesStart + 0) * 25 -2] = '',
+      [(CronkQuotesStart + 0) * 25 -1] = 'Error: 2022-09-06',
+      [(CronkQuotesStart + 0) * 25] = 'Error: AlexD: So it is allowed, correct? :)',
+      [(CronkQuotesStart + 5) * 25] = 'Error: Cronkhinator: I\'ll let you answer that question',
+      [(CronkQuotesStart + 10) * 25] = 'Error: AlexD: Oh so I can',
+      [(CronkQuotesStart + 11) * 25] = 'Error: AlexD: Epic',
+      [(CronkQuotesStart + 17) * 25] = 'Error: Cronkhinator: I look forward to it',
+      
+      [(CronkQuotesStart + 30) * 25 -6] = '',
+      [(CronkQuotesStart + 30) * 25 -5] = '',
+      [(CronkQuotesStart + 30) * 25 -4] = '',
+      [(CronkQuotesStart + 30) * 25 -3] = '',
+      [(CronkQuotesStart + 30) * 25 -2] = '',
+      [(CronkQuotesStart + 30) * 25 -1] = 'Error: 2022-06-04',
+      [(CronkQuotesStart + 30) * 25] = 'Error: asca: If you write an AI that makes your opponent\'s core just explode after 60s, are you allowed to enter the next AI tournament with it? ^^',
+      [(CronkQuotesStart + 32) * 25] = 'Error: asca: ... I\'m asking for a friend *cough*',
+      [(CronkQuotesStart + 42) * 25] = 'Error: Cronkhinator: of course',
+      [(CronkQuotesStart + 45) * 25] = 'Error: Cronkhinator: as long as it is all in the "blueprint"',
+      [(CronkQuotesStart + 50) * 25] = 'Error: asca: yes it would... okay xD',
+      End = (CronkQuotesStart + 51) * 25,
+    }
+  end,
+  Update = function(frame)
+
+    if frame <= CronkQuotesDef.End then
+      if CronkQuotesDef[frame] then
+        Log(tostring(CronkQuotesDef[frame]))
+      end
+    end
+  end,
+},
+After = {},
+    },
 }
 
 --------------------------------------------------------Modules End--------------------------------------------------------
@@ -196,3 +485,4 @@ local VaccineMetatable = {
 setmetatable(Fort[1], VaccineMetatable)
 
 --------------------------------------------------------Vaccine Code End--------------------------------------------------------
+
