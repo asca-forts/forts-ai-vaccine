@@ -879,12 +879,11 @@ Before = {
         
         if frame == FinalStart + (11 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Okay, this was a bit boring...')
+          Log('Error: AI'..myTeam()..': Okay, this was a little bit boring...')
         end
       end
       
       if frame == FinalStart + (13 * 25) then
-        ClearScreen()
         Log('Error: AI'..myTeam()..': Let\'s have some fun!')
         
         local devId, pos = GetFirstCoreFromTable(GetOpponentCores())
