@@ -911,12 +911,11 @@ Before = {
         
         if frame == FinalStart + (11 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Okay, this was a bit boring...')
+          Log('Error: AI'..myTeam()..': Okay, this was a little bit boring...')
         end
       end
       
       if frame == FinalStart + (13 * 25) then
-        ClearScreen()
         Log('Error: AI'..myTeam()..': Let\'s have some fun!')
         
         local devId, pos = GetFirstCoreFromTable(GetOpponentCores())
@@ -1268,7 +1267,7 @@ AmongusPath =
 		SwordAttack = function()
 			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, 2000), 1, myTeam(), true)
       ScheduleCall(10, MoveProjectileCloud, swordIndex, Vec3(0, -500))
-      ScheduleCall(6, Log, "Error: AI: The punishment is death! (By amongus) :D")
+      ScheduleCall(8, Log, "Error: AI: The punishment is death! (By amongus) :D")
       SwordStarted = true
 		end,
 	},
