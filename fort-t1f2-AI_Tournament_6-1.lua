@@ -440,11 +440,11 @@ Globals = {
 },
 Before = {
   Update = function(frame)
-    if frame > 4500 and frame < 6000 and frame % GHspawnInterval == 50 then
+    if frame > 4500 and frame < 6000 and frame % 50 == 0 then
       local randomPosition = Vec3(GetRandomInteger(-2000, 2000, ""),
                                   GetRandomInteger(-1500, 2000, "")
                                   )
-                                  
+               
       --SpawnCircle(randomPosition, 10, Red(), 10)
       dlc2_CreateProjectile("magneticfield", "magneticfield", 1, randomPosition, Vec3(1, 0), 100)
       dlc2_CreateProjectile("magneticfield", "magneticfield", 2, randomPosition, Vec3(1, 0), 100)
