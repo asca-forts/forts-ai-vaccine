@@ -630,20 +630,23 @@ Before = {
       for projectileIdx = 0, ProjectileCount(opponentTeam()) - 1 do
         local projectileId       = GetProjectileId(opponentTeam(), projectileIdx)
         local projectileSaveName = GetNodeProjectileSaveName(projectileId)
-        local projectilePos      = NodePosition(projectileId)
-        --Log('projectileSaveName='..tostring(projectileSaveName))
         
-        if frame > matrixDialog.startPause or not (   projectileSaveName == 'machinegun')
-                                                   --or projectileSaveName == 'sniper')
-        then
-          if projectilePos.x < barrier.DeadX then
-            DestroyProjectile(projectileId)
-          else
-            if projectilePos.x < barrier.x then
-              if not stoppedProjectiles[projectileId] then
-                stoppedProjectiles[projectileId] = { endFrame = frame + 25*matrixDialog.duration }
-                if GetNodeProjectileType(projectileId) == 2 then
-                  SetMissileTarget(projectileId, projectilePos)
+        if projectileSaveName ~= "magneticfield" then
+          local projectilePos      = NodePosition(projectileId)
+          --Log('projectileSaveName='..tostring(projectileSaveName))
+          
+          if frame > matrixDialog.startPause or not (   projectileSaveName == 'machinegun')
+                                                     --or projectileSaveName == 'sniper')
+          then
+            if projectilePos.x < barrier.DeadX then
+              DestroyProjectile(projectileId)
+            else
+              if projectilePos.x < barrier.x then
+                if not stoppedProjectiles[projectileId] then
+                  stoppedProjectiles[projectileId] = { endFrame = frame + 25*matrixDialog.duration }
+                  if GetNodeProjectileType(projectileId) == 2 then
+                    SetMissileTarget(projectileId, projectilePos)
+                  end
                 end
               end
             end
