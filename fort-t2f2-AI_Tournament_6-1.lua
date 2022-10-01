@@ -510,7 +510,7 @@ GunnerSniperTerror = {
           if gunnerLastFired[weaponId] == nil or frame > (gunnerLastFired[weaponId] + 100) then
            -- Log('FireWeapon='..tostring(weaponId))
             ReloadWeapon(weaponId)
-            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.5, FIREFLAG_NORMAL)
+            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.8, FIREFLAG_NORMAL)
             gunnerLastFired[weaponId] = frame
           end
         end
@@ -683,7 +683,7 @@ Before = {
         local spawnX = GetX(-2000, myTeam())
         for y = 0, 6 do
           for i = 0, 10 do
-            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(10000, -500 + (i * 100)), 30)
+            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 100)), 30)
           end
         end
       end
