@@ -440,14 +440,14 @@ Globals = {
 },
 Before = {
   Update = function(frame)
-    if frame > 4500 and frame < 6000 and frame % 50 == 0 then
-      local randomPosition = Vec3(GetRandomInteger(-2000, 2000, ""),
-                                  GetRandomInteger(-1500, 2000, "")
+    if frame > 4500 and frame < 6000 and frame % 100 == 0 then
+      local randomPosition = Vec3(GetRandomInteger(-2000, 2000, "bla"),
+                                  GetRandomInteger(-1500, 2000, "bla")
                                   )
                
       --SpawnCircle(randomPosition, 10, Red(), 10)
-      dlc2_CreateProjectile("magneticfield", "magneticfield", 1, randomPosition, Vec3(1, 0), 100)
-      dlc2_CreateProjectile("magneticfield", "magneticfield", 2, randomPosition, Vec3(1, 0), 100)
+      dlc2_CreateProjectile("magneticfield", "magneticfield", 1, randomPosition, Vec3(1, 0), 10)
+      dlc2_CreateProjectile("magneticfield", "magneticfield", 2, randomPosition, Vec3(1, 0), 10)
     end
   end,
 },
@@ -540,7 +540,7 @@ GunnerSniperTerror = {
   Globals = {},
   Before = {
     Update = function(frame)
-      if frame % (30*25) == 0 then      
+      if frame % (30*25) == 0 then -- and not (frame > 4500 and frame < 6000) then      
         local sideId = myTeam()
        -- Log('sideId='..tostring(sideId))
         for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
@@ -683,7 +683,7 @@ Before = {
       if matrixDialog.active and frame > (matrixDialog.startFrame + matrixDialog.duration*25) then
         matrixDialog.active   = false
         matrixDialog.disabled = true
-        Log('Error: Morpheus: He is the one!')
+       -- Log('Error: Morpheus: He is the one!')
       end
     end
   end,
