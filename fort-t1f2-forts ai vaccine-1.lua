@@ -1060,15 +1060,16 @@ UpdateCloudPath = function (index, projectileCloud)
                     local cloudNewTargetLocation = projectilePath[pathStep+1]
                     if (cloudNewTargetLocation) then
                         projectileCloud["pathStep"] = pathStep+1
-                        --BetterLog("Moving to next step!")
+                        --Log("Moving to next step!")
                         local cloudNewTargetVector = Vec3(cloudNewTargetLocation[1], cloudNewTargetLocation[2])
                         --SpawnCircle(cloudNewTargetVector, 55, Blue(255), 20)
                         MoveProjectileCloud(index, cloudNewTargetVector)
                     else
-                        --BetterLog("Path completed!")
+                       
 						if (projectileCloud["loops"] == true) then
 							projectileCloud["pathStep"] = 1
-							MoveProjectileCloud(index, projectilePath[1])
+							local newTargetForCloud = projectilePath[1]
+							MoveProjectileCloud(index, Vec3(newTargetForCloud[1], newTargetForCloud[2]))
 						else
                         	projectileCloud["pathCompleted"] = true
 						end
