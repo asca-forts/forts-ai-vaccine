@@ -1244,7 +1244,71 @@ AmongusPath =
         EnablePauseMenu(true)
       end
     }
+    },
+  MouseCommands = {
+    Global = {
+      Stage1 = {-7100, 5725},
+      Stage2 = {7100, -8100},
+      Stage3 = {7100, 5800},
+      Stage4 = {-7100, 5800},
+      CurrentStage = 0,
+      ChangingStage = false,
+
+      AbleToChangeStage = function (mousePos, stage)
+        if stage == 1 then
+          if (mousePos.x < Stage1[1] and mousePos.y > Stage1[2]) then
+            return true
+          end
+        elseif stage == 2 then
+          if (mousePos.x > Stage2[1] and mousePos.y < Stage2[2]) then
+            return true
+          end
+        elseif stage == 3 then
+          if (mousePos.x > Stage3[1] and mousePos.y > Stage3[2]) then
+            return true
+          end
+        elseif stage == 4 then
+          if (mousePos.x < Stage2[1] and mousePos.y > Stage2[2]) then
+            return true
+          end
+        end
+        return false
+      end,
+
+      TryChangeStage = function (stage)
+        if (AbleToChangeStage(ProcessedMousePos(), stage)) then
+          CurrentStage = stage + 1
+        end
+        ChangingStage = false
+      end,
+      
+    },
+
+    After = {
+      Update= function ()
+        local mousePos = ProcessedMousePos()
+        if (mousePos ~= nil) then
+          if (ChangingStage == false) then
+            
+            if CurrentStage == 5 then
+              -- Backup/Emergency command :: activated
+              SendScriptEvent('aMagicFunction', '', '', false)
+              ChangingStage = true
+            else
+              if (AbleToChangeStage(mousePos, CurrentStage)) then
+                ScheduleCall(5, TryChangeStage, CurrentStage)
+                ChangingStage = true
+              end
+            end
+          end
+        end
+      end
+    },
+
+    Before = {
+
     }
+  }
 }
 
 --------------------------------------------------------Modules End--------------------------------------------------------
