@@ -588,12 +588,15 @@ GunnerSniperTerror = {
     ProtectionArea = { -- issue #11
 Globals = {
   stoppedProjectiles = {},
-  matrixDialog = { duration = 8, active = false, disabled = false, startPause = 3*60*25},
+  matrixDialog = { duration = 8, active = false, disabled = false, startPause = 2*60*25},
 },
 Before = {
   Load = function()
-    barrier.x = GetX(-1000, myTeam())
-    barrier.DeadX = GetX(-2500, myTeam())
+    barrier.x = GetX(-1000, opponentTeam())
+    barrier.DeadX = GetX(-2500, opponentTeam())
+    
+   -- Log('barrier.x='..tostring(barrier.x))
+    --Log('barrier.DeadX='..tostring(barrier.DeadX))
   end,
   Update = function(frame)
     if aMagicVariable then
@@ -640,10 +643,17 @@ Before = {
         end
         --Log('velo='..tostring(velo))
         dlc2_ApplyForce(projectileId, velo)
-        stoppedProjectilesCount = stoppedProjectilesCount + 1
+        
+        local projectileSaveName = GetNodeProjectileSaveName(projectileId)
+        if not (   projectileSaveName == 'machinegun'
+                or projectileSaveName == 'sniper'
+                or projectileSaveName == 'sniper2')
+        then
+          stoppedProjectilesCount = stoppedProjectilesCount + 1
+        end
       end
       
-      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 7 then
+      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 0 then
         Log('Error: AI'..myTeam()..': No.')
         matrixDialog.active   = true
         matrixDialog.startFrame = frame
@@ -686,7 +696,7 @@ After = {},
 
     NohaTest = { -- issue #10
 Globals = {
-  NohaTestStart = 120, -- in seconds
+  NohaTestStart = 60, -- in seconds
   NohaTestDef  = {},
 },
 Before = {
