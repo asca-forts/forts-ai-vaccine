@@ -358,7 +358,7 @@ end
 
 --------------------------------------------------------Modules Start--------------------------------------------------------
 
-SpecialGuestIsInLobby = true  --TODO: change to false
+SpecialGuestIsInLobby = false  --TODO: change to false
 function SetSpecialGuestInLobby()
   SpecialGuestIsInLobby = true
   Log('SetSpecialGuestInLobby')
@@ -411,6 +411,8 @@ function GetFirstCoreFromTable(tab)
     return id, pos
   end
 end
+
+gunnerLastFired = {}
 
 Modules = {
     SideDetection = {
@@ -485,9 +487,45 @@ Before = {
 After = {},
     },
     
-Common = {
+GunnerSniperTerror = {
   Globals = {},
   Before = {
+    Update = function(frame)
+      local sideId = myTeam()
+     -- Log('sideId='..tostring(sideId))
+      for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+        local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+        --Log('weaponId='..tostring(weaponId))
+        if GetDeviceType(weaponId) == 'machinegun' then
+        --  Log('xxx')
+          if gunnerLastFired[weaponId] == nil or frame > (gunnerLastFired[weaponId] + 100) then
+           -- Log('FireWeapon='..tostring(weaponId))
+            ReloadWeapon(weaponId)
+            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.5, FIREFLAG_NORMAL)
+            gunnerLastFired[weaponId] = frame
+          end
+        end
+        
+        if GetDeviceType(weaponId) == 'sniper' then
+          ReloadWeapon(weaponId)
+        end
+      end
+    end,
+    OnDoorState = function(teamId, nodeA, nodeB, doorState)
+      if DS_OPENING == doorState then
+      local sideId = myTeam()
+        for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+          local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+          if GetDeviceType(weaponId) == 'sniper' then
+            ReloadWeapon(weaponId)
+            local posA = NodePosition(nodeA)
+            local posB = NodePosition(nodeB)
+            local midPos = Vec3((posA.x + posB.x)/2, (posA.y + posB.y)/2)
+            FireWeapon(weaponId, midPos, 0.0, FIREFLAG_NORMAL)
+          end
+        end
+      end
+    end,
   },
   After = {},
 },
@@ -608,7 +646,7 @@ After = {},
 
     NohaTest = { -- issue #10
 Globals = {
-  NohaTestStart = 90, -- in seconds
+  NohaTestStart = 120, -- in seconds
   NohaTestDef  = {},
 },
 Before = {
@@ -623,7 +661,7 @@ Before = {
     }
   end,
   Update = function(frame)
-    --Log('frame='..frame)
+    -- TODO: Protection for top core
     if SpecialGuestIsInLobby and frame <= NohaTestDef.testend then
       if frame == NohaTestDef.question then
         ClearScreen()
@@ -641,11 +679,14 @@ Before = {
         end
       end
       if frame == NohaTestDef.testend then
-        Log('Error: AI'..myTeam()..': ok, you\'re alive. You are not Noah\'s AI')
+        if GetTableSize(GetOpponentCores()) > 1 then
+          Log('Error: AI'..myTeam()..': ok, you\'re alive. You are not Noah\'s AI')
+        else
+          Log('Error: AI'..myTeam()..': Haha, you must be Noah\'s AI')
+        end
       end
     end
   end,
-  --TODO: if core dies, then the other answer
 },
 After = {},
     },
@@ -721,13 +762,12 @@ After = {},
 
     Final = { -- issue #10
 Globals = {
-  FinalStart = 1 * 25, -- in seconds
+  FinalStart = 7 * 60 * 25, -- in seconds
 },
 Before = {
   Load = function()
   end,
   Update = function(frame)
-    -- TODO: check if 2 cores are alive
     if SpecialGuestIsInLobby then
       if GetTableSize(GetOpponentCores()) > 1 then
         if frame == FinalStart then
@@ -781,7 +821,7 @@ Before = {
           Log('Countdown: 1')
         end
         if frame == FinalStart + (10 * 25) then
-          if true or StringExists("data.ServerName") then --TODO: Remove the true
+          if StringExists("data.ServerName") then
             local pos = GetMousePos()
             if pos.y < 300 then -- top
               SendScriptEvent('BurnOpponentDeath', '"top"', '', false)
