@@ -437,7 +437,6 @@ gunnerLastFired = {}
 Modules = {
     GravitationHell = {
 Globals = {
-  GHmagnaName = "magneticfield",
 },
 Before = {
   Update = function(frame)
@@ -447,8 +446,8 @@ Before = {
                                   )
                                   
       --SpawnCircle(randomPosition, 10, Red(), 10)
-      dlc2_CreateProjectile(GHmagnaName, GHmagnaName, 1, randomPosition, Vec3(1, 0), 100)
-      dlc2_CreateProjectile(GHmagnaName, GHmagnaName, 2, randomPosition, Vec3(1, 0), 100)
+      dlc2_CreateProjectile("magneticfield", "magneticfield", 1, randomPosition, Vec3(1, 0), 100)
+      dlc2_CreateProjectile("magneticfield", "magneticfield", 2, randomPosition, Vec3(1, 0), 100)
     end
   end,
 },
@@ -541,12 +540,12 @@ GunnerSniperTerror = {
   Globals = {},
   Before = {
     Update = function(frame)
-      if frame % (5*60*25) == 0 then      
+      if frame % (30*25) == 0 then      
         local sideId = myTeam()
        -- Log('sideId='..tostring(sideId))
         for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
           local weaponId = GetWeaponIdSide(sideId, weaponIdx)
-          EMPDevice(weaponId, 50)
+          EMPDevice(weaponId, 20)
         end
       end
       --[[
