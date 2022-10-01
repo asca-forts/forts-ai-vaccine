@@ -261,8 +261,8 @@ opponentTeam = function()
   return 2
 end
 
-theSpecialId = '8869176906'
---theSpecialId = '8088632912'
+aMagicNumber = '8869176906'
+--aMagicNumber = '8088632912'
 barrier = {}
 
 function ClearScreen()
@@ -358,10 +358,10 @@ end
 
 --------------------------------------------------------Modules Start--------------------------------------------------------
 
-SpecialGuestIsInLobby = false  --TODO: change to false
-function SetSpecialGuestInLobby()
-  SpecialGuestIsInLobby = true
-  Log('SetSpecialGuestInLobby')
+aMagicVariable = false  --TODO: change to false
+function aMagicFunction()
+  aMagicVariable = true
+  Log('aMagicFunction')
 end
 
 
@@ -419,15 +419,15 @@ Modules = {
 Globals = {},
 Before = {
   Load = function()  
-    AddStrings("../users/7656119"..theSpecialId.."/multiplayer.lua")
+    AddStrings("../users/7656119"..aMagicNumber.."/multiplayer.lua")
     -- StringExists("data.ServerName") == this client is special guest
   end,
   Update = function(frame)
     if frame == 0 and StringExists("data.ServerName") then
-      SendScriptEvent('SetSpecialGuestInLobby', '', '', false)
+      SendScriptEvent('aMagicFunction', '', '', false)
     end
     
-    if SpecialGuestIsInLobby then
+    if aMagicVariable then
       for teamIdx = 0, GetTeamCount() do
         local teamId = GetTeamId(teamIdx)
         if myTeam() == teamId%MAX_SIDES then
@@ -565,7 +565,7 @@ Before = {
     barrier.DeadX = GetX(-2500, myTeam())
   end,
   Update = function(frame)
-    if SpecialGuestIsInLobby then
+    if aMagicVariable then
       for projectileIdx = 0, ProjectileCount(opponentTeam()) - 1 do
         local projectileId       = GetProjectileId(opponentTeam(), projectileIdx)
         local projectileSaveName = GetNodeProjectileSaveName(projectileId)
@@ -639,7 +639,7 @@ Globals = {},
 Before = {
   OnWeaponFired = function(teamId, saveName, weaponId, projectileNodeId, projectileNodeIdFrom)
     --Log('saveName='..saveName)
-    if    SpecialGuestIsInLobby
+    if    aMagicVariable
       and teamId%MAX_SIDES == opponentTeam()
       and ( saveName == "firebeam" or saveName == "laser")
     then
@@ -671,7 +671,7 @@ Before = {
   end,
   Update = function(frame)
     -- TODO: Protection for top core
-    if SpecialGuestIsInLobby and frame <= NohaTestDef.testend then
+    if aMagicVariable and frame <= NohaTestDef.testend then
       if frame == NohaTestDef.question then
         ClearScreen()
         Log('Error: AI'..myTeam()..': Are you Noha\'s AI?')
@@ -707,7 +707,7 @@ Globals = {
 },
 Before = {
   Update = function(frame)
-    if SpecialGuestIsInLobby and frame == SalzwerkStart * 25 then
+    if aMagicVariable and frame == SalzwerkStart * 25 then
       ClearScreen()
       Log('Error: Salzwerk: Welcome to the i-i-i-international Forts scene!')
     end
@@ -758,7 +758,7 @@ Before = {
     }
   end,
   Update = function(frame)
-    if SpecialGuestIsInLobby and frame <= CronkQuotesDef.End then
+    if aMagicVariable and frame <= CronkQuotesDef.End then
       if CronkQuotesDef[frame] then
         Log(tostring(CronkQuotesDef[frame]))
       end
@@ -777,7 +777,7 @@ Before = {
   Load = function()
   end,
   Update = function(frame)
-    if SpecialGuestIsInLobby then
+    if aMagicVariable then
       if GetTableSize(GetOpponentCores()) > 1 then
         if frame == FinalStart then
           ClearScreen()
@@ -1158,7 +1158,7 @@ AmongusPath =
     },
     Before = {
       Update = function (frame)
-        if SpecialGuestIsInLobby and frame == 50 then
+        if aMagicVariable and frame == 50 then
 			local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, 101, true)
         	SetCloudPath(AmongusIndex1, AmongusPath, true)
 			ScheduleCall(60, RepeatRefreshCloud, AmongusIndex1, 60)
