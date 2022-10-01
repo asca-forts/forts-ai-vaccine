@@ -871,6 +871,16 @@ Before = {
           end
 
           data.Disable = true
+          
+          
+          local sideId = opponentTeam()
+          for devIdx = 0, GetDeviceCountSide(sideId) - 1 do
+            local devId = GetDeviceIdSide(sideId, devIdx)
+            if GetDeviceType(devId) == 'battery' then
+              DestroyDeviceById(devId)
+            end
+          end
+          
           ClearScreen()
           Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 10')
