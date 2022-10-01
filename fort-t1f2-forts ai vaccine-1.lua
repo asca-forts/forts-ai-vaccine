@@ -287,6 +287,9 @@ end
 function GetProjectileWeightFactor(projectileId)
   return GetProjectileParamFloat(GetNodeProjectileSaveName(projectileId), NodeTeam(projectileId), "ProjectileMass", 11.11) * 10
 end
+function pointDistance(a, b)
+  return math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
+end
 -- Control a node's velocity
  
 -- Velocity Control Tables
@@ -795,11 +798,12 @@ Before = {
         end
       end
       
-      if frame == FinalStart + (13 * 25) or frame == FinalStart + (14 * 25 + 1) then
+      if frame == FinalStart + (13 * 25) then
         ClearScreen()
         Log('Error: AI'..myTeam()..': Let\'s have some fun!')
         
         local devId, pos = GetFirstCoreFromTable(GetOpponentCores())
+        --[[
         if pos.y < 500 then -- top
           for nodeIdx = 0, NodeCount(opponentTeam()) do
             local nodeId = GetNodeId(opponentTeam(), nodeIdx)
@@ -820,6 +824,29 @@ Before = {
               end
             end
           end
+        end
+        ]]
+        
+        local reactorNodeA = GetDevicePlatformA(devId)
+        local reactorNodeB = GetDevicePlatformB(devId)
+        
+        for nodeIdx = 0, NodeCount(opponentTeam()) do
+          local nodeId = GetNodeId(opponentTeam(), nodeIdx)
+          if nodeId ~= reactorNodeA and nodeId ~= reactorNodeB then
+            DestroyProjectile(nodeId)
+          end
+        end
+      end
+      
+      if frame > FinalStart + (13 * 25) then
+        local devId, pos = GetFirstCoreFromTable(GetOpponentCores())
+        local reactorNodeA = GetDevicePlatformA(devId)
+        local reactorNodeB = GetDevicePlatformB(devId)
+        if pointDistance(Vec3(0, 0), pos) > 100 then
+          local nodeAPos = NodePosition(reactorNodeA)
+          UpdateNodeVelocity(reactorNodeA, Vec3(-1 * nodeAPos.x, -1 * nodeAPos.y))
+          local nodeBPos = NodePosition(reactorNodeB)
+          UpdateNodeVelocity(reactorNodeB, Vec3(-1 * nodeBPos.x, -1 * nodeBPos.y))
         end
       end
     end
