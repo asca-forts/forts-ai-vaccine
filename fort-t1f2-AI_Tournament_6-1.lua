@@ -1234,7 +1234,7 @@ AmongusPath =
 
 		SwordStarted = false,
 		SwordAttack = function()
-			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -2000), 1, myTeam(), true)
+			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, 2000), 1, myTeam(), true)
       MoveProjectileCloud(swordIndex, Vec3(0, -4000))
       SwordStarted = true
 		end,
