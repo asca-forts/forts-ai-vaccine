@@ -1248,10 +1248,10 @@ AmongusPath =
     },
     MouseCommands = {
       Global = {
-        Stage1 = {-7100, 5725},
-        Stage2 = {7100, -8100},
-        Stage3 = {7100, 5800},
-        Stage4 = {-7100, 5800},
+        Stage1 = {-7100, 5725}, -- Bot left
+        Stage2 = {7100, -8100}, -- Top right
+        Stage3 = {7100, 5800}, -- Bot left
+        Stage4 = {-7100, 5800}, -- Top left
         CurrentStage = 0,
         ChangingStage = false,
   
@@ -1269,7 +1269,7 @@ AmongusPath =
               return true
             end
           elseif stage == 4 then
-            if (mousePos.x < Stage2[1] and mousePos.y > Stage2[2]) then
+            if (mousePos.x < Stage4[1] and mousePos.y > Stage4[2]) then
               return true
             end
           end
@@ -1279,6 +1279,7 @@ AmongusPath =
         TryChangeStage = function (stage)
           if (AbleToChangeStage(ProcessedMousePos(), stage)) then
             CurrentStage = stage + 1
+            Log("CHANGED TO STAGE: " .. tostring(CurrentStage))
           end
           ChangingStage = false
         end,
@@ -1310,7 +1311,7 @@ AmongusPath =
   
       }
     }
-}
+  }
 
 --------------------------------------------------------Modules End--------------------------------------------------------
 
