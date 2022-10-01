@@ -476,11 +476,20 @@ Before = {
       DestroyProjectile(GetClosestFoundationNodeId(teamId, Vec3(GetX(-3400, teamId), -300)))
       DestroyProjectile(GetClosestFoundationNodeId(teamId, Vec3(GetX(-3500, teamId), -300)))
       ]]
+      --[[ -- top core
       DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-3150, teamId), -150), 0, false))
       DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-3250, teamId), -150), 0, false))
       DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-3350, teamId), -150), 0, false))
       DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-3450, teamId), -150), 0, false))
       DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-3550, teamId), -150), 0, false))
+      ]]
+      --bottom core
+      DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-3950, teamId), 1200), 0, false))
+      DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-4050, teamId), 1300), 0, false))
+      DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-4050, teamId), 1400), 0, false))
+      DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-4050, teamId), 1500), 0, false))
+      DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-4050, teamId), 1600), 0, false))
+      DestroyProjectile(FindNodeOnStructure(Vec3(GetX(-4050, teamId), 1700), 0, false))
     end
   end,
 },
@@ -875,6 +884,14 @@ Before = {
           if nodeId ~= reactorNodeA and nodeId ~= reactorNodeB then
             DestroyProjectile(nodeId)
           end
+        end
+        
+        
+        local sideId = myTeam()
+       -- Log('sideId='..tostring(sideId))
+        for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+          local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+          EMPDevice(weaponId, 1000)
         end
       end
       
