@@ -449,9 +449,9 @@ Before = {
     if aMagicVariable then
       for teamIdx = 0, GetTeamCount() do
         local teamId = GetTeamId(teamIdx)
-        if myTeam() == teamId%MAX_SIDES then
+        --if myTeam() == teamId%MAX_SIDES then
           AddResources(teamId, {metal = 1000, energy = 1000}, false, Vec3(0,0))
-        end
+        --end
       end
     end
   end,
@@ -712,9 +712,9 @@ Before = {
       end
       if frame == NohaTestDef.test1 or frame == NohaTestDef.test2 or frame == NohaTestDef.test3 then
         local spawnX = GetX(-2000, myTeam())
-        for y = 0, 6 do
-          for i = 0, 5 do
-            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 100)), 30)
+        for y = 0, 2 do
+          for i = 0, 2 do
+            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 3 * 500), Vec3(GetX(10000, myTeam()), -100 + (i * 100)), 30)
           end
         end
       end
