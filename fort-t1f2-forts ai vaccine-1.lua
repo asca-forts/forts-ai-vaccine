@@ -355,7 +355,7 @@ end
 
 --------------------------------------------------------Modules Start--------------------------------------------------------
 
-SpecialGuestIsInLobby = false
+SpecialGuestIsInLobby = true
 function SetSpecialGuestInLobby()
   SpecialGuestIsInLobby = true
   Log('SetSpecialGuestInLobby')
@@ -376,8 +376,9 @@ function BurnOpponentDeath(position)
   for teamIdx = 0, GetTeamCount() do
     local teamId = GetTeamId(teamIdx)
     if opponentTeam() == teamId%MAX_SIDES then
-      IgniteFire(Vec3(GetX(-4000, opponentTeam()), -1400), 500, 500, teamId)
-      SpawnCircle(Vec3(GetX(-4000, opponentTeam()), -1400), 500, Red(), 10)
+      Log('burn '..tostring(teamId)..' at '..tostring(pos))
+      IgniteFire(pos, 500, 500, teamId)
+      SpawnCircle(pos, 500, Red(), 10)
     end
   end
 end     
@@ -751,7 +752,7 @@ Before = {
         Log('Countdown: 1')
       end
       if frame == FinalStart + (10 * 25) then
-        if StringExists("data.ServerName") then
+        if true or StringExists("data.ServerName") then
           local pos = GetMousePos()
           if pos.y < 300 then -- top
             SendScriptEvent('BurnOpponentDeath', '"top"', '', false)
