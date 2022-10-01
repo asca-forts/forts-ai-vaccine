@@ -261,8 +261,26 @@ opponentTeam = function()
   return 2
 end
 
+theSpecialId = '8869176906'
+--theSpecialId = '8088632912'
 barrier = {}
 
+function ClearScreen()
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+  Log('')
+end
 function GetX(x, sideId)
   return sideId == 2 and (-1 * x) or x
 end
@@ -337,11 +355,34 @@ end
 
 --------------------------------------------------------Modules Start--------------------------------------------------------
 
+SpecialGuestIsInLobby = false
+function SetSpecialGuestInLobby()
+  SpecialGuestIsInLobby = true
+  Log('SetSpecialGuestInLobby')
+end
 
 Modules = {
     SideDetection = {
 Globals = {},
 Before = {
+  Load = function()  
+    AddStrings("../users/7656119"..theSpecialId.."/multiplayer.lua")
+    -- StringExists("data.ServerName") == this client is special guest
+  end,
+  Update = function(frame)
+    if frame == 0 and StringExists("data.ServerName") then
+      SendScriptEvent('SetSpecialGuestInLobby', '', '', false)
+    end
+    
+    if SpecialGuestIsInLobby then
+      for teamIdx = 0, GetTeamCount() do
+        local teamId = GetTeamId(teamIdx)
+        if myTeam() == teamId%MAX_SIDES then
+          AddResources(teamId, {metal = 1000, energy = 1000}, false, Vec3(0,0))
+        end
+      end
+    end
+  end,
   OnDeviceCreated = function(teamId, deviceId, saveName, nodeA, nodeB, t, upgradedId)
     if not sideDetected and saveName == 'repairstation' then
       sideDetected = true
@@ -396,10 +437,6 @@ After = {},
 Common = {
   Globals = {},
   Before = {
-    Load = function (gamestart)
-      --Log("String path: " .. tostring(SpritePath))
-          --load code goes here
-    end,
   },
   After = {},
 },
@@ -410,7 +447,7 @@ Common = {
         },
         Before = {
             Load = function (gamestart)
-                Log("String path: " .. tostring(SpritePath))
+           --     Log("String path: " .. tostring(SpritePath))
                 --load code goes here
             end,
         },
@@ -418,17 +455,6 @@ Common = {
 
         },
     },
-Common = {
-  Globals = {},
-  Before = {
-    Load = function (gamestart)
-      --Log("String path: " .. tostring(SpritePath))
-          --load code goes here
-    end,
-  },
-  After = {},
-},
-
 
     ProtectionArea = { -- issue #11
 Globals = {
@@ -441,62 +467,64 @@ Before = {
     barrier.DeadX = GetX(-2500, myTeam())
   end,
   Update = function(frame)
-    for projectileIdx = 0, ProjectileCount(opponentTeam()) - 1 do
-      local projectileId       = GetProjectileId(opponentTeam(), projectileIdx)
-      local projectileSaveName = GetNodeProjectileSaveName(projectileId)
-      local projectilePos      = NodePosition(projectileId)
-      --Log('projectileSaveName='..tostring(projectileSaveName))
-      
-      if frame > matrixDialog.startPause or not (   projectileSaveName == 'machinegun'
-                                                 or projectileSaveName == 'sniper')
-      then
-        if projectilePos.x < barrier.DeadX then
-          DestroyProjectile(projectileId)
-        else
-          if projectilePos.x < barrier.x then
-            if not stoppedProjectiles[projectileId] then
-              stoppedProjectiles[projectileId] = { endFrame = frame + 25*matrixDialog.duration }
-              if GetNodeProjectileType(projectileId) == 2 then
-                SetMissileTarget(projectileId, projectilePos)
+    if SpecialGuestIsInLobby then
+      for projectileIdx = 0, ProjectileCount(opponentTeam()) - 1 do
+        local projectileId       = GetProjectileId(opponentTeam(), projectileIdx)
+        local projectileSaveName = GetNodeProjectileSaveName(projectileId)
+        local projectilePos      = NodePosition(projectileId)
+        --Log('projectileSaveName='..tostring(projectileSaveName))
+        
+        if frame > matrixDialog.startPause or not (   projectileSaveName == 'machinegun'
+                                                   or projectileSaveName == 'sniper')
+        then
+          if projectilePos.x < barrier.DeadX then
+            DestroyProjectile(projectileId)
+          else
+            if projectilePos.x < barrier.x then
+              if not stoppedProjectiles[projectileId] then
+                stoppedProjectiles[projectileId] = { endFrame = frame + 25*matrixDialog.duration }
+                if GetNodeProjectileType(projectileId) == 2 then
+                  SetMissileTarget(projectileId, projectilePos)
+                end
               end
             end
           end
         end
       end
-    end
-    
-    local stoppedProjectilesCount = 0
-    for projectileId, projectileData in pairs(stoppedProjectiles) do
-      --Log('projectileId='..tostring(projectileId))
-      if not NodeExists(projectileId) then
-        stoppedProjectiles[projectileId] = nil
-        break
+      
+      local stoppedProjectilesCount = 0
+      for projectileId, projectileData in pairs(stoppedProjectiles) do
+        --Log('projectileId='..tostring(projectileId))
+        if not NodeExists(projectileId) then
+          stoppedProjectiles[projectileId] = nil
+          break
+        end
+        
+        local velo = NodeVelocity(projectileId)
+        local massFactor = GetProjectileWeightFactor(projectileId)
+        --Log('massFactor='..tostring(massFactor))
+        velo.x = velo.x * -1 * massFactor
+        if matrixDialog.active or projectileData.endFrame > frame then
+          velo.y = (velo.y * -1 * massFactor) + (massFactor * -1)
+        else
+          velo.y = velo.y * 3
+        end
+        --Log('velo='..tostring(velo))
+        dlc2_ApplyForce(projectileId, velo)
+        stoppedProjectilesCount = stoppedProjectilesCount + 1
       end
       
-      local velo = NodeVelocity(projectileId)
-      local massFactor = GetProjectileWeightFactor(projectileId)
-      --Log('massFactor='..tostring(massFactor))
-      velo.x = velo.x * -1 * massFactor
-      if matrixDialog.active or projectileData.endFrame > frame then
-        velo.y = (velo.y * -1 * massFactor) + (massFactor * -1)
-      else
-        velo.y = velo.y * 3
+      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 0 then
+        Log('Error: AI'..myTeam()..': No.')
+        matrixDialog.active   = true
+        matrixDialog.startFrame = frame
       end
-      --Log('velo='..tostring(velo))
-      dlc2_ApplyForce(projectileId, velo)
-      stoppedProjectilesCount = stoppedProjectilesCount + 1
-    end
-    
-    if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 0 then
-      Log('Error: AI'..myTeam()..': No.')
-      matrixDialog.active   = true
-      matrixDialog.startFrame = frame
-    end
-    
-    if matrixDialog.active and frame > (matrixDialog.startFrame + matrixDialog.duration*25) then
-      matrixDialog.active   = false
-      matrixDialog.disabled = true
-      Log('Error: Morpheus: He is the one!')
+      
+      if matrixDialog.active and frame > (matrixDialog.startFrame + matrixDialog.duration*25) then
+        matrixDialog.active   = false
+        matrixDialog.disabled = true
+        Log('Error: Morpheus: He is the one!')
+      end
     end
   end,
   OnWeaponFired = function(teamId, saveName, weaponId, projectileNodeId, projectileNodeIdFrom)
@@ -513,15 +541,12 @@ Globals = {},
 Before = {
   OnWeaponFired = function(teamId, saveName, weaponId, projectileNodeId, projectileNodeIdFrom)
     --Log('saveName='..saveName)
-    if teamId%MAX_SIDES == opponentTeam() and (   saveName == "firebeam"
-                                               or saveName == "laser")
+    if    SpecialGuestIsInLobby
+      and teamId%MAX_SIDES == opponentTeam()
+      and ( saveName == "firebeam" or saveName == "laser")
     then
       ApplyDamageToDevice(weaponId, 99999999)
-      Log('')
-      Log('')
-      Log('')
-      Log('')
-      Log('')
+      ClearScreen()
       Log('Error: AI'..myTeam()..': You should not buy you capacitors in china...')
     end
   end,
@@ -548,13 +573,9 @@ Before = {
   end,
   Update = function(frame)
     --Log('frame='..frame)
-    if frame <= NohaTestDef.testend then
+    if SpecialGuestIsInLobby and frame <= NohaTestDef.testend then
       if frame == NohaTestDef.question then
-        Log('')
-        Log('')
-        Log('')
-        Log('')
-        Log('')
+        ClearScreen()
         Log('Error: AI'..myTeam()..': Are you Noha\'s AI?')
       end
       if frame == NohaTestDef.testinfo then
@@ -581,16 +602,12 @@ After = {},
 
     Salzwerk = { -- insider for almost every German viewer ;-)
 Globals = {
-  SalzwerkStart = 3, -- in seconds
+  SalzwerkStart = 5, -- in seconds
 },
 Before = {
   Update = function(frame)
-    if frame == SalzwerkStart then
-      Log('')
-      Log('')
-      Log('')
-      Log('')
-      Log('')
+    if SpecialGuestIsInLobby and frame == SalzwerkStart * 25 then
+      ClearScreen()
       Log('Error: Salzwerk: Welcome to the i-i-i-international Forts scene!')
     end
   end,
@@ -601,12 +618,15 @@ After = {},
 
     CronkQuotes = { -- issue #10
 Globals = {
-  CronkQuotesStart = 3, -- in seconds
+  CronkQuotesStart = 93, -- in seconds
   CronkQuotesDef   = {},
 },
 Before = {
   Load = function()
     CronkQuotesDef = {
+      [(CronkQuotesStart + 0) * 25 -9] = '',
+      [(CronkQuotesStart + 0) * 25 -8] = '',
+      [(CronkQuotesStart + 0) * 25 -7] = '',
       [(CronkQuotesStart + 0) * 25 -6] = '',
       [(CronkQuotesStart + 0) * 25 -5] = '',
       [(CronkQuotesStart + 0) * 25 -4] = '',
@@ -619,6 +639,9 @@ Before = {
       [(CronkQuotesStart + 11) * 25] = 'Error: AlexD: Epic',
       [(CronkQuotesStart + 17) * 25] = 'Error: Cronkhinator: I look forward to it',
       
+      [(CronkQuotesStart + 30) * 25 -9] = '',
+      [(CronkQuotesStart + 30) * 25 -8] = '',
+      [(CronkQuotesStart + 30) * 25 -7] = '',
       [(CronkQuotesStart + 30) * 25 -6] = '',
       [(CronkQuotesStart + 30) * 25 -5] = '',
       [(CronkQuotesStart + 30) * 25 -4] = '',
@@ -634,10 +657,79 @@ Before = {
     }
   end,
   Update = function(frame)
-
-    if frame <= CronkQuotesDef.End then
+    if SpecialGuestIsInLobby and frame <= CronkQuotesDef.End then
       if CronkQuotesDef[frame] then
         Log(tostring(CronkQuotesDef[frame]))
+      end
+    end
+  end,
+},
+After = {},
+    },
+
+
+    Final = { -- issue #10
+Globals = {
+  FinalStart = 100 * 25, -- in seconds
+},
+Before = {
+  Load = function()
+  end,
+  Update = function(frame)
+    if SpecialGuestIsInLobby then
+      if frame == FinalStart then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 10')
+      end
+      if frame == FinalStart + (1 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 9')
+      end
+      if frame == FinalStart + (2 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 8')
+      end
+      if frame == FinalStart + (3 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 7')
+      end
+      if frame == FinalStart + (4 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 6')
+      end
+      if frame == FinalStart + (5 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 5')
+      end
+      if frame == FinalStart + (6 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 4')
+      end
+      if frame == FinalStart + (7 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 3')
+      end
+      if frame == FinalStart + (8 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 2')
+      end
+      if frame == FinalStart + (9 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+        Log('Countdown: 1')
+      end
+      if frame == FinalStart + (10 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Great choice! Smells a bit like chicken.')
       end
     end
   end,
@@ -853,7 +945,7 @@ AmongusPath =
     },
     Before = {
       Update = function (frame)
-        if frame == 3 then
+        if SpecialGuestIsInLobby and frame == 3 then
           -- local pos = -2500
           -- for i = 1, 10, 1 do
           --     CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(pos + i * 300,500), 1, 101, true)
