@@ -1228,6 +1228,17 @@ AmongusPath =
 		end
 	}
   },
+  AntiPause = {
+    Before = {
+      Update = function ()
+        EnablePauseMenu(false)
+      end,
+  
+      OnGameResult = function ()
+        EnablePauseMenu(true)
+      end
+    }
+    }
 }
 
 --------------------------------------------------------Modules End--------------------------------------------------------
