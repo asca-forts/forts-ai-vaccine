@@ -366,19 +366,21 @@ function BurnOpponentDeath(position)
   ClearScreen()
   Log('Error: AI'..myTeam()..': '..tostring(position)..' - great choice! Smells a bit like chicken.')
   
-  local pos = nil
   if position == 'top' then
-    pos = Vec3(GetX(-3300, opponentTeam()), 0)
+    for nodeIdx = 0, NodeCount(opponentTeam()) - 1 do
+      local nodeId = GetNodeId(opponentTeam(), nodeIdx)
+      
+      if NodePosition(nodeId).y < 500 then
+        DestroyProjectile(nodeId)
+      end
+    end
   else
-    pos = Vec3(GetX(-4000, opponentTeam()), 0)
-  end
-  
-  for teamIdx = 0, GetTeamCount() do
-    local teamId = GetTeamId(teamIdx)
-    if opponentTeam() == teamId%MAX_SIDES then
-      Log('burn '..tostring(teamId)..' at '..tostring(pos))
-      IgniteFire(pos, 500, 500, teamId)
-      SpawnCircle(pos, 500, Red(), 10)
+    for nodeIdx = 0, NodeCount(opponentTeam()) - 1 do
+      local nodeId = GetNodeId(opponentTeam(), nodeIdx)
+      
+      if NodePosition(nodeId).y > 500 then
+        DestroyProjectile(nodeId)
+      end
     end
   end
 end     
