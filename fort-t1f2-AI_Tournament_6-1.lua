@@ -293,6 +293,7 @@ function pointDistance(a, b)
 end
 -- Control a node's velocity
  
+ 
 -- Velocity Control Tables
 pidControl = {}
 pidControl.errorOldNodeVelocity = {}
@@ -434,6 +435,27 @@ end
 gunnerLastFired = {}
 
 Modules = {
+    GravitationHell = {
+Globals = {
+  GHmagnaName = "magneticfield",
+},
+Before = {
+  Update = function(frame)
+    if frame > 4500 and frame < 6000 and frame % GHspawnInterval == 50 then
+      local randomPosition = Vec3(GetRandomInteger(-2000, 2000, ""),
+                                  GetRandomInteger(-1500, 2000, "")
+                                  )
+                                  
+      --SpawnCircle(randomPosition, 10, Red(), 10)
+      dlc2_CreateProjectile(GHmagnaName, GHmagnaName, 1, randomPosition, Vec3(1, 0), 100)
+      dlc2_CreateProjectile(GHmagnaName, GHmagnaName, 2, randomPosition, Vec3(1, 0), 100)
+    end
+  end,
+},
+After = {},
+    },
+    
+
     SideDetection = {
 Globals = {},
 Before = {
@@ -606,8 +628,8 @@ Before = {
         local projectilePos      = NodePosition(projectileId)
         --Log('projectileSaveName='..tostring(projectileSaveName))
         
-        if frame > matrixDialog.startPause or not (   projectileSaveName == 'machinegun'
-                                                   or projectileSaveName == 'sniper')
+        if frame > matrixDialog.startPause or not (   projectileSaveName == 'machinegun')
+                                                   --or projectileSaveName == 'sniper')
         then
           if projectilePos.x < barrier.DeadX then
             DestroyProjectile(projectileId)
@@ -653,7 +675,7 @@ Before = {
         end
       end
       
-      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 0 then
+      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 3 then
         Log('Error: AI'..myTeam()..': No.')
         matrixDialog.active   = true
         matrixDialog.startFrame = frame
@@ -724,7 +746,7 @@ Before = {
         local spawnX = GetX(-2000, myTeam())
         for y = 0, 2 do
           for i = 0, 2 do
-            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 3 * 500), Vec3(GetX(10000, myTeam()), -100 + (i * 100)), 30)
+            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -800 + y * 3 * 400), Vec3(GetX(10000, myTeam()), -100 + (i * 100)), 30)
           end
         end
       end
