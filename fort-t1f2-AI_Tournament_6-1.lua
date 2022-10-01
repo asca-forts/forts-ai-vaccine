@@ -811,6 +811,13 @@ Before = {
     if aMagicVariable then
       if GetTableSize(GetOpponentCores()) > 1 then
         if frame == FinalStart then
+        
+          local sideId = myTeam()
+         -- Log('sideId='..tostring(sideId))
+          for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+            local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+            EMPDevice(weaponId, 1000)
+          end
           ClearScreen()
           Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 10')
@@ -915,13 +922,6 @@ Before = {
           end
         end
         
-        
-        local sideId = myTeam()
-       -- Log('sideId='..tostring(sideId))
-        for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
-          local weaponId = GetWeaponIdSide(sideId, weaponIdx)
-          EMPDevice(weaponId, 1000)
-        end
       end
       
       if frame > FinalStart + (13 * 25) then
