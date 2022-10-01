@@ -1236,7 +1236,7 @@ AmongusPath =
 		SwordAttack = function()
 			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, 2000), 1, myTeam(), true)
       ScheduleCall(10, MoveProjectileCloud, swordIndex, Vec3(0, -500))
-      ScheduleCall(6, Log, "Error: AI: The punishment is death! (By amongus) :D")
+      ScheduleCall(8, Log, "Error: AI: The punishment is death! (By amongus) :D")
       SwordStarted = true
 		end,
 	},
