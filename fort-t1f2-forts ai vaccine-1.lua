@@ -510,7 +510,7 @@ GunnerSniperTerror = {
           if gunnerLastFired[weaponId] == nil or frame > (gunnerLastFired[weaponId] + 100) then
            -- Log('FireWeapon='..tostring(weaponId))
             ReloadWeapon(weaponId)
-            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.5, FIREFLAG_NORMAL)
+            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.8, FIREFLAG_NORMAL)
             gunnerLastFired[weaponId] = frame
           end
         end
