@@ -287,6 +287,9 @@ end
 function GetProjectileWeightFactor(projectileId)
   return GetProjectileParamFloat(GetNodeProjectileSaveName(projectileId), NodeTeam(projectileId), "ProjectileMass", 11.11) * 10
 end
+function pointDistance(a, b)
+  return math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y))
+end
 -- Control a node's velocity
  
 -- Velocity Control Tables
@@ -355,7 +358,7 @@ end
 
 --------------------------------------------------------Modules Start--------------------------------------------------------
 
-SpecialGuestIsInLobby = true
+SpecialGuestIsInLobby = true  --TODO: change to false
 function SetSpecialGuestInLobby()
   SpecialGuestIsInLobby = true
   Log('SetSpecialGuestInLobby')
@@ -385,6 +388,29 @@ function BurnOpponentDeath(position)
   end
 end     
 
+function GetOpponentCores()
+  local cores = {}
+  local sideId = opponentTeam()
+  for devIdx = 0, GetDeviceCountSide(sideId) - 1 do
+    local devId = GetDeviceIdSide(sideId, devIdx)
+    if GetDeviceType(devId) == 'reactor' then
+      cores[devId] = GetDeviceCentrePosition(devId)
+    end
+  end
+  return cores
+end
+function GetTableSize(tab)
+  local count = 0
+  for _ in pairs(tab) do
+    count = count + 1
+  end
+  return count
+end
+function GetFirstCoreFromTable(tab)
+  for id, pos in pairs(tab) do
+    return id, pos
+  end
+end
 
 Modules = {
     SideDetection = {
@@ -419,8 +445,8 @@ Before = {
       end
       topFortTeamId = NodeTeam(nodeA)
       
-      Log('myTeam = '..tostring(myTeam()))
-      Log('opponentTeam = '..tostring(opponentTeam()))
+      --Log('myTeam = '..tostring(myTeam()))
+      --Log('opponentTeam = '..tostring(opponentTeam()))
     end
   end,
 },
@@ -695,72 +721,132 @@ After = {},
 
     Final = { -- issue #10
 Globals = {
-  FinalStart = 10 * 25, -- in seconds
+  FinalStart = 1 * 25, -- in seconds
 },
 Before = {
   Load = function()
   end,
   Update = function(frame)
-    --Log('GetMousePos()='..tostring(GetMousePos()))
+    -- TODO: check if 2 cores are alive
     if SpecialGuestIsInLobby then
-      if frame == FinalStart then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 10')
-      end
-      if frame == FinalStart + (1 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 9')
-      end
-      if frame == FinalStart + (2 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 8')
-      end
-      if frame == FinalStart + (3 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 7')
-      end
-      if frame == FinalStart + (4 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 6')
-      end
-      if frame == FinalStart + (5 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 5')
-      end
-      if frame == FinalStart + (6 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 4')
-      end
-      if frame == FinalStart + (7 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 3')
-      end
-      if frame == FinalStart + (8 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 2')
-      end
-      if frame == FinalStart + (9 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
-        Log('Countdown: 1')
-      end
-      if frame == FinalStart + (10 * 25) then
-        if true or StringExists("data.ServerName") then
-          local pos = GetMousePos()
-          if pos.y < 300 then -- top
-            SendScriptEvent('BurnOpponentDeath', '"top"', '', false)
-          else --bottom
-            SendScriptEvent('BurnOpponentDeath', '"bottom"', '', false)
+      if GetTableSize(GetOpponentCores()) > 1 then
+        if frame == FinalStart then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 10')
+        end
+        if frame == FinalStart + (1 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 9')
+        end
+        if frame == FinalStart + (2 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 8')
+        end
+        if frame == FinalStart + (3 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 7')
+        end
+        if frame == FinalStart + (4 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 6')
+        end
+        if frame == FinalStart + (5 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 5')
+        end
+        if frame == FinalStart + (6 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 4')
+        end
+        if frame == FinalStart + (7 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 3')
+        end
+        if frame == FinalStart + (8 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 2')
+        end
+        if frame == FinalStart + (9 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Countdown: 1')
+        end
+        if frame == FinalStart + (10 * 25) then
+          if true or StringExists("data.ServerName") then --TODO: Remove the true
+            local pos = GetMousePos()
+            if pos.y < 300 then -- top
+              SendScriptEvent('BurnOpponentDeath', '"top"', '', false)
+            else --bottom
+              SendScriptEvent('BurnOpponentDeath', '"bottom"', '', false)
+            end
           end
+        end
+        
+        
+        if frame == FinalStart + (11 * 25) then
+          ClearScreen()
+          Log('Error: AI'..myTeam()..': Okay, this was a bit boring...')
+        end
+      end
+      
+      if frame == FinalStart + (13 * 25) then
+        ClearScreen()
+        Log('Error: AI'..myTeam()..': Let\'s have some fun!')
+        
+        local devId, pos = GetFirstCoreFromTable(GetOpponentCores())
+        --[[
+        if pos.y < 500 then -- top
+          for nodeIdx = 0, NodeCount(opponentTeam()) do
+            local nodeId = GetNodeId(opponentTeam(), nodeIdx)
+            if nodeId then
+              local nodePos = NodePosition(nodeId)
+              if nodePos.y < -250 or nodePos.x < -3700 or nodePos.x > 3700 then
+                DestroyProjectile(nodeId)
+              end
+            end
+          end
+        else -- bottom
+          for nodeIdx = 0, NodeCount(opponentTeam()) do
+            local nodeId = GetNodeId(opponentTeam(), nodeIdx)
+            if nodeId then
+              local nodePos = NodePosition(nodeId)
+              if nodePos.y < -1300 or nodePos.x < -4100 or nodePos.x > 4100 then
+                DestroyProjectile(nodeId)
+              end
+            end
+          end
+        end
+        ]]
+        
+        local reactorNodeA = GetDevicePlatformA(devId)
+        local reactorNodeB = GetDevicePlatformB(devId)
+        
+        for nodeIdx = 0, NodeCount(opponentTeam()) do
+          local nodeId = GetNodeId(opponentTeam(), nodeIdx)
+          if nodeId ~= reactorNodeA and nodeId ~= reactorNodeB then
+            DestroyProjectile(nodeId)
+          end
+        end
+      end
+      
+      if frame > FinalStart + (13 * 25) then
+        local devId, pos = GetFirstCoreFromTable(GetOpponentCores())
+        local reactorNodeA = GetDevicePlatformA(devId)
+        local reactorNodeB = GetDevicePlatformB(devId)
+        if pointDistance(Vec3(0, 0), pos) > 100 then
+          local nodeAPos = NodePosition(reactorNodeA)
+          UpdateNodeVelocity(reactorNodeA, Vec3(-1 * nodeAPos.x, -1 * nodeAPos.y))
+          local nodeBPos = NodePosition(reactorNodeB)
+          UpdateNodeVelocity(reactorNodeB, Vec3(-1 * nodeBPos.x, -1 * nodeBPos.y))
         end
       end
     end
@@ -1102,7 +1188,7 @@ function VaccinateModules()
 			end
 		end
     end
-	Log("Registering")
+	--Log("Registering")
     RegisterVaccinationCallbacks(eventCallbacks)
 end
 
