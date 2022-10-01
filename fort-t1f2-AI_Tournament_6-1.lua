@@ -261,7 +261,8 @@ opponentTeam = function()
   return 2
 end
 
-aMagicNumber = '8869176906'
+aMagicNumber = '7985174884'
+--aMagicNumber = '8869176906'
 --aMagicNumber = '8088632912'
 barrier = {}
 
@@ -510,7 +511,7 @@ GunnerSniperTerror = {
           if gunnerLastFired[weaponId] == nil or frame > (gunnerLastFired[weaponId] + 100) then
            -- Log('FireWeapon='..tostring(weaponId))
             ReloadWeapon(weaponId)
-            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.8, FIREFLAG_NORMAL)
+            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.1, FIREFLAG_NORMAL)
             gunnerLastFired[weaponId] = frame
           end
         end
