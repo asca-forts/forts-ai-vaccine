@@ -361,6 +361,19 @@ function SetSpecialGuestInLobby()
   Log('SetSpecialGuestInLobby')
 end
 
+
+function BurnOpponentDeath(position)
+  ClearScreen()
+  Log('Error: AI'..myTeam()..': '..tostring(position)..' - great choice! Smells a bit like chicken.')
+  
+  if position == 'top' then
+    IgniteFire(Vec3(GetX(-3300, opponentTeam()), 0), 500, 500, opponentTeam())
+  else
+    IgniteFire(Vec3(GetX(-4000, opponentTeam()), -1400), 500, 500, opponentTeam())
+  end
+end     
+
+
 Modules = {
     SideDetection = {
 Globals = {},
@@ -557,7 +570,7 @@ After = {},
 
     NohaTest = { -- issue #10
 Globals = {
-  NohaTestStart = 75, -- in seconds
+  NohaTestStart = 90, -- in seconds
   NohaTestDef  = {},
 },
 Before = {
@@ -618,7 +631,7 @@ After = {},
 
     CronkQuotes = { -- issue #10
 Globals = {
-  CronkQuotesStart = 93, -- in seconds
+  CronkQuotesStart = 60, -- in seconds
   CronkQuotesDef   = {},
 },
 Before = {
@@ -670,12 +683,13 @@ After = {},
 
     Final = { -- issue #10
 Globals = {
-  FinalStart = 100 * 25, -- in seconds
+  FinalStart = 10 * 25, -- in seconds
 },
 Before = {
   Load = function()
   end,
   Update = function(frame)
+    Log('GetMousePos()='..tostring(GetMousePos()))
     if SpecialGuestIsInLobby then
       if frame == FinalStart then
         ClearScreen()
@@ -728,8 +742,14 @@ Before = {
         Log('Countdown: 1')
       end
       if frame == FinalStart + (10 * 25) then
-        ClearScreen()
-        Log('Error: AI'..myTeam()..': Great choice! Smells a bit like chicken.')
+        if StringExists("data.ServerName") then
+          local pos = GetMousePos()
+          if pos.y < 300 then -- top
+            SendScriptEvent('BurnOpponentDeath', '"top"', '', false)
+          else --bottom
+            SendScriptEvent('BurnOpponentDeath', '"bottom"', '', false)
+          end
+        end
       end
     end
   end,
