@@ -1151,7 +1151,7 @@ AmongusPath =
   },
   SwordFinale = {
 	Globals = {
-		START_DELAY_SECONDS = 450,
+		START_DELAY_SECONDS = (7*60)+30,
 
 		AmongusPath1 = {
 
