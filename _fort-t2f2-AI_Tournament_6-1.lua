@@ -519,6 +519,15 @@ GunnerSniperTerror = {
   Globals = {},
   Before = {
     Update = function(frame)
+      if frame % 750 == 0 then      
+        local sideId = myTeam()
+       -- Log('sideId='..tostring(sideId))
+        for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+          local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+          EMPDevice(weaponId, 15)
+        end
+      end
+      --[[
       local sideId = myTeam()
      -- Log('sideId='..tostring(sideId))
       for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
@@ -538,8 +547,10 @@ GunnerSniperTerror = {
           ReloadWeapon(weaponId)
         end
       end
+      ]]
     end,
     OnDoorState = function(teamId, nodeA, nodeB, doorState)
+      --[[
       if DS_OPENING == doorState then
       local sideId = myTeam()
         for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
@@ -553,6 +564,7 @@ GunnerSniperTerror = {
           end
         end
       end
+      ]]
     end,
   },
   After = {},
@@ -631,7 +643,7 @@ Before = {
         stoppedProjectilesCount = stoppedProjectilesCount + 1
       end
       
-      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 0 then
+      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 7 then
         Log('Error: AI'..myTeam()..': No.')
         matrixDialog.active   = true
         matrixDialog.startFrame = frame
@@ -701,7 +713,7 @@ Before = {
       if frame == NohaTestDef.test1 or frame == NohaTestDef.test2 or frame == NohaTestDef.test3 then
         local spawnX = GetX(-2000, myTeam())
         for y = 0, 6 do
-          for i = 0, 10 do
+          for i = 0, 5 do
             dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 100)), 30)
           end
         end

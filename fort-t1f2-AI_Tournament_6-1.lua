@@ -255,10 +255,10 @@ Fort =
 sideDetected = false
 topFortTeamId = nil
 myTeam = function()
-  return 1
+  return 2
 end
 opponentTeam = function()
-  return 2
+  return 1
 end
 
 aMagicNumber = '7985174884'
@@ -359,7 +359,7 @@ end
 
 --------------------------------------------------------Modules Start--------------------------------------------------------
 
-aMagicVariable = false  --TODO: change to false
+aMagicVariable = true  --TODO: change to false
 function aMagicFunction()
   aMagicVariable = true
   Log('aMagicFunction')
@@ -368,23 +368,41 @@ end
 
 function BurnOpponentDeath(position)
   ClearScreen()
-  Log('Error: AI'..myTeam()..': '..tostring(position)..' - great choice! Smells a bit like chicken.')
+  Log('Error: AI'..myTeam()..': '..tostring(position)..' - great choice, I hope you did not like that base!')
   
   if position == 'top' then
     for nodeIdx = 0, NodeCount(opponentTeam()) - 1 do
       local nodeId = GetNodeId(opponentTeam(), nodeIdx)
       
-      if NodePosition(nodeId).y < 500 then
-        DestroyProjectile(nodeId)
+      if NodePosition(nodeId).y < 500  then
+        local hasDevice = false
+        local LinkCount = NodeLinkCount(nodeId)
+        for linkIndex = 1, LinkCount, 1 do
+          local linkedNode = NodeLinkedNodeId(nodeId, linkIndex)
+          if (GetDeviceIdOnPlatform(nodeId, linkedNode) > 0) then
+            hasDevice = true
+            break
+          end
+        end
+        if (hasDevice == false) then
+          DestroyProjectile(nodeId)
+        end
       end
     end
   else
     for nodeIdx = 0, NodeCount(opponentTeam()) - 1 do
-      local nodeId = GetNodeId(opponentTeam(), nodeIdx)
-      
-      if NodePosition(nodeId).y > 500 then
-        DestroyProjectile(nodeId)
-      end
+      local hasDevice = false
+        local LinkCount = NodeLinkCount(nodeId)
+        for linkIndex = 1, LinkCount, 1 do
+          local linkedNode = NodeLinkedNodeId(nodeId, linkIndex)
+          if (GetDeviceIdOnPlatform(nodeId, linkedNode) > 0) then
+            hasDevice = true
+            break
+          end
+        end
+        if (hasDevice == false) then
+          DestroyProjectile(nodeId)
+        end
     end
   end
 end     
@@ -501,6 +519,15 @@ GunnerSniperTerror = {
   Globals = {},
   Before = {
     Update = function(frame)
+      if frame % 750 == 0 then      
+        local sideId = myTeam()
+       -- Log('sideId='..tostring(sideId))
+        for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+          local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+          EMPDevice(weaponId, 15)
+        end
+      end
+      --[[
       local sideId = myTeam()
      -- Log('sideId='..tostring(sideId))
       for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
@@ -510,31 +537,34 @@ GunnerSniperTerror = {
         --  Log('xxx')
           if gunnerLastFired[weaponId] == nil or frame > (gunnerLastFired[weaponId] + 100) then
            -- Log('FireWeapon='..tostring(weaponId))
-            --ReloadWeapon(weaponId)
-            --FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.1, FIREFLAG_NORMAL)
+            ReloadWeapon(weaponId)
+            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.1, FIREFLAG_NORMAL)
             gunnerLastFired[weaponId] = frame
           end
         end
         
         if GetDeviceType(weaponId) == 'sniper' then
-          --ReloadWeapon(weaponId)
+          ReloadWeapon(weaponId)
         end
       end
+      ]]
     end,
     OnDoorState = function(teamId, nodeA, nodeB, doorState)
+      --[[
       if DS_OPENING == doorState then
       local sideId = myTeam()
         for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
           local weaponId = GetWeaponIdSide(sideId, weaponIdx)
           if GetDeviceType(weaponId) == 'sniper' then
-            --ReloadWeapon(weaponId)
+            ReloadWeapon(weaponId)
             local posA = NodePosition(nodeA)
             local posB = NodePosition(nodeB)
             local midPos = Vec3((posA.x + posB.x)/2, (posA.y + posB.y)/2)
-            --FireWeapon(weaponId, midPos, 0.0, FIREFLAG_NORMAL)
+            FireWeapon(weaponId, midPos, 0.0, FIREFLAG_NORMAL)
           end
         end
       end
+      ]]
     end,
   },
   After = {},
@@ -613,7 +643,7 @@ Before = {
         stoppedProjectilesCount = stoppedProjectilesCount + 1
       end
       
-      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 8 then
+      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 7 then
         Log('Error: AI'..myTeam()..': No.')
         matrixDialog.active   = true
         matrixDialog.startFrame = frame
@@ -684,7 +714,7 @@ Before = {
         local spawnX = GetX(-2000, myTeam())
         for y = 0, 6 do
           for i = 0, 5 do
-            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 200)), 30)
+            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 100)), 30)
           end
         end
       end
@@ -720,7 +750,7 @@ After = {},
 
     CronkQuotes = { -- issue #10
 Globals = {
-  CronkQuotesStart = 60, -- in seconds
+  CronkQuotesStart = 10000, -- in seconds
   CronkQuotesDef   = {},
 },
 Before = {
@@ -772,81 +802,71 @@ After = {},
 
     Final = { -- issue #10
 Globals = {
-  FinalStart = 7 * 60 * 25, -- in seconds
+  FinalStart = 0.3 * 60 * 25, -- in seconds
 },
 Before = {
   Load = function()
   end,
   Update = function(frame)
-    if frame % 750 == 0 then      
-      local sideId = myTeam()
-     -- Log('sideId='..tostring(sideId))
-      for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
-        local weaponId = GetWeaponIdSide(sideId, weaponIdx)
-        EMPDevice(weaponId, 15)
-      end
-    end
     if aMagicVariable then
       if GetTableSize(GetOpponentCores()) > 1 then
         if frame == FinalStart then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 10')
         end
         if frame == FinalStart + (1 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 9')
         end
         if frame == FinalStart + (2 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 8')
         end
         if frame == FinalStart + (3 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 7')
         end
         if frame == FinalStart + (4 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 6')
         end
         if frame == FinalStart + (5 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 5')
         end
         if frame == FinalStart + (6 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 4')
         end
         if frame == FinalStart + (7 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 3')
         end
         if frame == FinalStart + (8 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 2')
         end
         if frame == FinalStart + (9 * 25) then
           ClearScreen()
-          Log('Error: AI'..myTeam()..': Hey Incursus... choose a Fort by moving your mouse in the upper or lower half of your screen')
+          Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 1')
         end
         if frame == FinalStart + (10 * 25) then
-          if StringExists("data.ServerName") then
             local pos = GetMousePos()
             if pos.y < 300 then -- top
               SendScriptEvent('BurnOpponentDeath', '"top"', '', false)
             else --bottom
               SendScriptEvent('BurnOpponentDeath', '"bottom"', '', false)
             end
-          end
         end
         
         
@@ -896,6 +916,12 @@ Before = {
         end
         
         
+        local sideId = myTeam()
+       -- Log('sideId='..tostring(sideId))
+        for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+          local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+          EMPDevice(weaponId, 1000)
+        end
       end
       
       if frame > FinalStart + (13 * 25) then
@@ -1013,7 +1039,6 @@ UpdateCloud = function(projectileCloud)
 
     local projectileIds = projectileCloud["indexs"]
     local projectileIntendedPositions = projectileCloud["projectilePos"]
-    
     
     for index, projectileId in ipairs(projectileIds) do
         if (NodeExists(projectileId) == true) then
@@ -1164,63 +1189,65 @@ AmongusPath =
       Update = function (frame)
 
         if aMagicVariable and frame == 50 then
-          local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, myTeam(), true)
-        	SetCloudPath(AmongusIndex1, AmongusPath, true)
-          ScheduleCall(60, RepeatRefreshCloud, AmongusIndex1, 60)
+          local AmongusIndex = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, myTeam(), true)
+        	SetCloudPath(AmongusIndex, AmongusPath, true)
+          ScheduleCall(60, RepeatRefreshCloud, AmongusIndex, 60)
         end
       end
     }
   },
   SwordFinale = {
 	Globals = {
-		START_DELAY_SECONDS = (7*60)+30,
+		START_DELAY_SECONDS = (0.6*60),
 
 		AmongusPath1 = {
-
+      {500, 500},
+      {500, -500},
+      {-500, -500},
+      {-500, 500},
 		},
 		AmongusPath2 = {
-			
+      {-500, -500},
+      {-500, 500},
+      {500, 500},
+      {500, -500},
 		},
 		
 		AmongusSpawn = function()
-
+      local amongus1Index = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(500, 600), 1, myTeam(), true)
+      SetCloudPath(amongus1Index, AmongusPath1, true)
+      local amongus2Index = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-500, -600), 1, myTeam(), true)
+      SetCloudPath(amongus2Index, AmongusPath2, true)
 		end,
 
 		SwordShape = {
-			{0,0,0,0,1,0,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
 			{0,0,1,1,1,1,1,0,0},
-			{1,1,1,1,1,1,1,1,1},
-			{0,1,1,1,1,1,1,1,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,0,1,0,0,0,0},
-
+			{0,0,1,1,1,1,1,0,0},
+			{0,1,1,1,0,0,1,0,0},
+			{0,1,1,1,1,1,1,0,0},
+			{0,1,1,1,1,1,1,0,0},
+			{0,0,1,1,1,1,1,0,0},
+			{0,0,1,1,0,1,1,0,0},
+			{0,0,1,1,0,1,1,0,0},
+			{0,0,0,0,0,0,0,0,0},
 		},
 
 		SwordStarted = false,
 		SwordAttack = function()
-			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -5000), 1, myTeam(), true)
-			ProjectileClouds[swordIndex] = nil
-			SwordStarted = true
+			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -2000), 1, myTeam(), true)
+      MoveProjectileCloud(swordIndex, Vec3(0, -4000))
+      SwordStarted = true
 		end,
 	},
 	After = {
 		Update = function(frame)
-			if (frame == START_DELAY_SECONDS*25) then
+      if (frame == START_DELAY_SECONDS*25) then
+        AmongusSpawn()
+      end
+			if (frame == START_DELAY_SECONDS*25 + 10) then
 				SwordAttack()
 				ClearScreen()
-          		Log('Error: AI'..myTeam()..': It\'s been nice knowing you ;)')
+          		Log('Error: AI'..myTeam()..': There is an imposter amongus')
 			end
 		end,
 
@@ -1232,23 +1259,17 @@ AmongusPath =
 	}
   },
   AntiPause = {
-    Global = {
-
-    },
-    After = {
-
-    },
     Before = {
       Update = function ()
         --EnablePauseMenu(false)
       end,
   
       OnGameResult = function ()
-        --EnablePauseMenu(true)
+        EnablePauseMenu(true)
       end
     }
     }
-  }
+}
 
 --------------------------------------------------------Modules End--------------------------------------------------------
 
