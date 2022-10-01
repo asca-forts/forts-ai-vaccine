@@ -1144,9 +1144,11 @@ AmongusPath =
 
 		},
 
+		SwordStarted = false,
 		SwordAttack = function()
 			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -5000), 1, 101, true)
 			ProjectileClouds[swordIndex] = nil
+			SwordStarted = true
 		end,
 	},
 	After = {
@@ -1155,6 +1157,12 @@ AmongusPath =
 				SwordAttack()
 			end
 		end,
+
+		OnProjectileDestroyed = function(nodeId, teamId, saveName, structureIdHit)
+			if (saveName == "cannon" and SwordStarted == true) then
+				--SpawnEffect("effects/mushroom_cloud.lua", NodePosition(nodeId))
+			end
+		end
 	}
   }
 }
