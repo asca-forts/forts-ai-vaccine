@@ -434,20 +434,26 @@ end
 
 gunnerLastFired = {}
 
+GHPositions = {}
+
 Modules = {
     GravitationHell = {
 Globals = {
 },
 Before = {
-  Update = function(frame)
-    if frame > 4500 and frame < 6000 and frame % 100 == 0 then
-      local randomPosition = Vec3(GetRandomInteger(-2000, 2000, "bla"),
-                                  GetRandomInteger(-1500, 2000, "bla")
+  Load = function()
+    for frame = 4500, 6000 do
+      if frame >= 4500 and frame =< 6000 and frame % 50 == 0 then
+        GHPositions[frame] = Vec3(GetRandomInteger(-2000, 2000, "bla"),
+                                  GetRandomInteger(-1500, 2000, "bla2")
                                   )
-               
-      --SpawnCircle(randomPosition, 10, Red(), 10)
-      dlc2_CreateProjectile("magneticfield", "magneticfield", 1, randomPosition, Vec3(1, 0), 10)
-      dlc2_CreateProjectile("magneticfield", "magneticfield", 2, randomPosition, Vec3(1, 0), 10)
+      end
+    end
+  end,
+  Update = function(frame)
+    if GHPositions[frame] then
+      dlc2_CreateProjectile("magneticfield", "magneticfield", 1, GHPositions[frame], Vec3(1, 0), 100)
+      dlc2_CreateProjectile("magneticfield", "magneticfield", 2, GHPositions[frame], Vec3(1, 0), 100)
     end
   end,
 },
