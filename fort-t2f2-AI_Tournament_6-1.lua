@@ -1229,6 +1229,12 @@ AmongusPath =
 	}
   },
   AntiPause = {
+    Global = {
+
+    },
+    After = {
+
+    },
     Before = {
       Update = function ()
         EnablePauseMenu(false)
