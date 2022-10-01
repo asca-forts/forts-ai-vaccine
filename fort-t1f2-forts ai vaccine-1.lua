@@ -839,9 +839,17 @@ Before = {
       end
       
       if frame > FinalStart + (13 * 25) then
+      --[[
+        starting from here the core and it's to nodes is everything that is left
+        we are in Update-function here. How do we move it to the mid?
+        'PID system for velocity' is at line ~300
+        ]]
         local devId, pos = GetFirstCoreFromTable(GetOpponentCores())
         local reactorNodeA = GetDevicePlatformA(devId)
         local reactorNodeB = GetDevicePlatformB(devId)
+        
+
+        
         if pointDistance(Vec3(0, 0), pos) > 100 then
           local nodeAPos = NodePosition(reactorNodeA)
           UpdateNodeVelocity(reactorNodeA, Vec3(-1 * nodeAPos.x, -1 * nodeAPos.y))
