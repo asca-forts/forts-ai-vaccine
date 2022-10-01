@@ -1012,7 +1012,23 @@ AmongusPath =
         end
       end
     }
-  }
+  },
+  SwordFinale = {
+	Globals = {
+		START_DELAY_SECONDS = 5,
+
+		AmongusPath1 = {
+
+		},
+		AmongusPath2 = {
+			
+		},
+		
+		AmongusSpawn = function()
+			
+		end,
+	},
+  },
 }
 
 --------------------------------------------------------Modules End--------------------------------------------------------
