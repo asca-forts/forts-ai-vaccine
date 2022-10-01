@@ -1021,10 +1021,12 @@ end,
 
 RefreshCloud = function (index)
 	local projectileCloud = ProjectileClouds[index]
-	for projectileIndex, projectileId in ipairs(projectileCloud["indexs"]) do
-		if NodeExists(projectileId) == true then
-			local newProjectileIndex = dlc2_CreateProjectile(GetNodeProjectileSaveName(projectileId), "", NodeTeam(projectileId), NodePosition(projectileId), Vec3(0,-100), 10000)
-			projectileIds[projectileIndex] = newProjectileIndex
+	if (projectileCloud ~= nil) then
+		for projectileIndex, projectileId in ipairs(projectileCloud["indexs"]) do
+			if NodeExists(projectileId) == true then
+				local newProjectileIndex = dlc2_CreateProjectile(GetNodeProjectileSaveName(projectileId), "", NodeTeam(projectileId), NodePosition(projectileId), Vec3(0,-100), 10000)
+				projectileIds[projectileIndex] = newProjectileIndex
+			end
 		end
 	end
 end,
@@ -1131,7 +1133,7 @@ AmongusPath =
     },
     After = {
       Update = function(frame)
-        for index, projectileCloud in ipairs(ProjectileClouds) do
+        for index, projectileCloud in pairs(ProjectileClouds) do
             UpdateCloud(projectileCloud)
             UpdateCloudPath(index, projectileCloud)
         end
@@ -1149,7 +1151,7 @@ AmongusPath =
   },
   SwordFinale = {
 	Globals = {
-		START_DELAY_SECONDS = 20,
+		START_DELAY_SECONDS = 450,
 
 		AmongusPath1 = {
 
@@ -1195,6 +1197,8 @@ AmongusPath =
 		Update = function(frame)
 			if (frame == START_DELAY_SECONDS*25) then
 				SwordAttack()
+				ClearScreen()
+          		Log('Error: AI'..myTeam()..': It\'s been nice knowing you ;)')
 			end
 		end,
 
