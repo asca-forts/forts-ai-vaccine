@@ -863,11 +863,13 @@ UpdateCloud = function(projectileCloud)
     end
 end,
 
-SetCloudPath = function (index, projectilePath)
+SetCloudPath = function (index, projectilePath, loops)
+	loops = loops or false
     ProjectileClouds[index]["path"] = projectilePath
     ProjectileClouds[index]["endpoint"] = projectilePath[#projectilePath]
     ProjectileClouds[index]["pathCompleted"] = false
     ProjectileClouds[index]["pathStep"] = 1
+	ProjectileClouds[index]["loops"] = loops
     MoveProjectileCloud(index, Vec3(projectilePath[1][1], projectilePath[1][2]))
 end,
 
@@ -899,7 +901,11 @@ UpdateCloudPath = function (index, projectileCloud)
                         MoveProjectileCloud(index, cloudNewTargetVector)
                     else
                         --BetterLog("Path completed!")
-                        projectileCloud["pathCompleted"] = true
+						if (projectileCloud["loop"] == true) then
+							projectileCloud["pathStep"] = 1
+						else
+                        	projectileCloud["pathCompleted"] = true
+						end
                     end
                     return
                 else
@@ -971,7 +977,7 @@ AmongusPath =
           --     CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(pos + i * 300,500), 1, 101, true)
           -- end
           TestIndex = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, 101, true)
-          SetCloudPath(TestIndex, AmongusPath)
+          SetCloudPath(TestIndex, AmongusPath, true)
         end
       end
     }
