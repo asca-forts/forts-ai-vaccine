@@ -1159,15 +1159,11 @@ AmongusPath =
     },
     Before = {
       Update = function (frame)
-<<<<<<< HEAD
-        if SpecialGuestIsInLobby and frame == 50 then
-			local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, myTeam(), true)
-=======
+
         if aMagicVariable and frame == 50 then
-			local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, 101, true)
->>>>>>> 6fd4a1ae52005cbe341156c6594ac8ec6bd5acdd
+          local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, myTeam(), true)
         	SetCloudPath(AmongusIndex1, AmongusPath, true)
-			ScheduleCall(60, RepeatRefreshCloud, AmongusIndex1, 60)
+          ScheduleCall(60, RepeatRefreshCloud, AmongusIndex1, 60)
         end
       end
     }
