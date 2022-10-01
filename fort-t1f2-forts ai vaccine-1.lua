@@ -366,10 +366,19 @@ function BurnOpponentDeath(position)
   ClearScreen()
   Log('Error: AI'..myTeam()..': '..tostring(position)..' - great choice! Smells a bit like chicken.')
   
+  local pos = nil
   if position == 'top' then
-    IgniteFire(Vec3(GetX(-3300, opponentTeam()), 0), 500, 500, opponentTeam())
+    pos = Vec3(GetX(-3300, opponentTeam()), 0)
   else
-    IgniteFire(Vec3(GetX(-4000, opponentTeam()), -1400), 500, 500, opponentTeam())
+    pos = Vec3(GetX(-4000, opponentTeam()), 0)
+  end
+  
+  for teamIdx = 0, GetTeamCount() do
+    local teamId = GetTeamId(teamIdx)
+    if opponentTeam() == teamId%MAX_SIDES then
+      IgniteFire(Vec3(GetX(-4000, opponentTeam()), -1400), 500, 500, teamId)
+      SpawnCircle(Vec3(GetX(-4000, opponentTeam()), -1400), 500, Red(), 10)
+    end
   end
 end     
 
@@ -689,7 +698,7 @@ Before = {
   Load = function()
   end,
   Update = function(frame)
-    Log('GetMousePos()='..tostring(GetMousePos()))
+    --Log('GetMousePos()='..tostring(GetMousePos()))
     if SpecialGuestIsInLobby then
       if frame == FinalStart then
         ClearScreen()
@@ -965,7 +974,7 @@ AmongusPath =
     },
     Before = {
       Update = function (frame)
-        if SpecialGuestIsInLobby and frame == 3 then
+        if SpecialGuestIsInLobby and frame == 50 then
           -- local pos = -2500
           -- for i = 1, 10, 1 do
           --     CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(pos + i * 300,500), 1, 101, true)
