@@ -359,7 +359,7 @@ end
 
 --------------------------------------------------------Modules Start--------------------------------------------------------
 
-aMagicVariable = false  --TODO: change to false
+aMagicVariable = true  --TODO: change to false
 function aMagicFunction()
   aMagicVariable = true
   Log('aMagicFunction')
@@ -368,23 +368,41 @@ end
 
 function BurnOpponentDeath(position)
   ClearScreen()
-  Log('Error: AI'..myTeam()..': '..tostring(position)..' - great choice! Smells a bit like chicken.')
+  Log('Error: AI'..myTeam()..': '..tostring(position)..' - great choice, I hope you did not like that base!')
   
   if position == 'top' then
     for nodeIdx = 0, NodeCount(opponentTeam()) - 1 do
       local nodeId = GetNodeId(opponentTeam(), nodeIdx)
       
-      if NodePosition(nodeId).y < 500 then
-        DestroyProjectile(nodeId)
+      if NodePosition(nodeId).y < 500  then
+        local hasDevice = false
+        local LinkCount = NodeLinkCount(nodeId)
+        for linkIndex = 1, LinkCount, 1 do
+          local linkedNode = NodeLinkedNodeId(nodeId, linkIndex)
+          if (GetDeviceIdOnPlatform(nodeId, linkedNode) > 0) then
+            hasDevice = true
+            break
+          end
+        end
+        if (hasDevice == false) then
+          DestroyProjectile(nodeId)
+        end
       end
     end
   else
     for nodeIdx = 0, NodeCount(opponentTeam()) - 1 do
-      local nodeId = GetNodeId(opponentTeam(), nodeIdx)
-      
-      if NodePosition(nodeId).y > 500 then
-        DestroyProjectile(nodeId)
-      end
+      local hasDevice = false
+        local LinkCount = NodeLinkCount(nodeId)
+        for linkIndex = 1, LinkCount, 1 do
+          local linkedNode = NodeLinkedNodeId(nodeId, linkIndex)
+          if (GetDeviceIdOnPlatform(nodeId, linkedNode) > 0) then
+            hasDevice = true
+            break
+          end
+        end
+        if (hasDevice == false) then
+          DestroyProjectile(nodeId)
+        end
     end
   end
 end     
@@ -720,7 +738,7 @@ After = {},
 
     CronkQuotes = { -- issue #10
 Globals = {
-  CronkQuotesStart = 60, -- in seconds
+  CronkQuotesStart = 10000, -- in seconds
   CronkQuotesDef   = {},
 },
 Before = {
@@ -772,7 +790,7 @@ After = {},
 
     Final = { -- issue #10
 Globals = {
-  FinalStart = 7 * 60 * 25, -- in seconds
+  FinalStart = 0.3 * 60 * 25, -- in seconds
 },
 Before = {
   Load = function()
@@ -831,14 +849,12 @@ Before = {
           Log('Countdown: 1')
         end
         if frame == FinalStart + (10 * 25) then
-          if StringExists("data.ServerName") then
             local pos = GetMousePos()
             if pos.y < 300 then -- top
               SendScriptEvent('BurnOpponentDeath', '"top"', '', false)
             else --bottom
               SendScriptEvent('BurnOpponentDeath', '"bottom"', '', false)
             end
-          end
         end
         
         
@@ -1012,7 +1028,6 @@ UpdateCloud = function(projectileCloud)
     local projectileIds = projectileCloud["indexs"]
     local projectileIntendedPositions = projectileCloud["projectilePos"]
     
-    
     for index, projectileId in ipairs(projectileIds) do
         if (NodeExists(projectileId) == true) then
             local NodePosition = NodePosition(projectileId)
@@ -1162,63 +1177,65 @@ AmongusPath =
       Update = function (frame)
 
         if aMagicVariable and frame == 50 then
-          local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, myTeam(), true)
-        	SetCloudPath(AmongusIndex1, AmongusPath, true)
-          ScheduleCall(60, RepeatRefreshCloud, AmongusIndex1, 60)
+          local AmongusIndex = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, myTeam(), true)
+        	SetCloudPath(AmongusIndex, AmongusPath, true)
+          ScheduleCall(60, RepeatRefreshCloud, AmongusIndex, 60)
         end
       end
     }
   },
   SwordFinale = {
 	Globals = {
-		START_DELAY_SECONDS = (7*60)+30,
+		START_DELAY_SECONDS = (0.6*60),
 
 		AmongusPath1 = {
-
+      {500, 500},
+      {500, -500},
+      {-500, -500},
+      {-500, 500},
 		},
 		AmongusPath2 = {
-			
+      {-500, -500},
+      {-500, 500},
+      {500, 500},
+      {500, -500},
 		},
 		
 		AmongusSpawn = function()
-
+      local amongus1Index = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(500, 600), 1, myTeam(), true)
+      SetCloudPath(amongus1Index, AmongusPath1, true)
+      local amongus2Index = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-500, -600), 1, myTeam(), true)
+      SetCloudPath(amongus2Index, AmongusPath2, true)
 		end,
 
 		SwordShape = {
-			{0,0,0,0,1,0,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
 			{0,0,1,1,1,1,1,0,0},
-			{1,1,1,1,1,1,1,1,1},
-			{0,1,1,1,1,1,1,1,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,1,1,1,0,0,0},
-			{0,0,0,0,1,0,0,0,0},
-
+			{0,0,1,1,1,1,1,0,0},
+			{0,1,1,1,0,0,1,0,0},
+			{0,1,1,1,1,1,1,0,0},
+			{0,1,1,1,1,1,1,0,0},
+			{0,0,1,1,1,1,1,0,0},
+			{0,0,1,1,0,1,1,0,0},
+			{0,0,1,1,0,1,1,0,0},
+			{0,0,0,0,0,0,0,0,0},
 		},
 
 		SwordStarted = false,
 		SwordAttack = function()
-			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -5000), 1, myTeam(), true)
-			ProjectileClouds[swordIndex] = nil
-			SwordStarted = true
+			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -2000), 1, myTeam(), true)
+      MoveProjectileCloud(swordIndex, Vec3(0, -4000))
+      SwordStarted = true
 		end,
 	},
 	After = {
 		Update = function(frame)
-			if (frame == START_DELAY_SECONDS*25) then
+      if (frame == START_DELAY_SECONDS*25) then
+        AmongusSpawn()
+      end
+			if (frame == START_DELAY_SECONDS*25 + 10) then
 				SwordAttack()
 				ClearScreen()
-          		Log('Error: AI'..myTeam()..': It\'s been nice knowing you ;)')
+          		Log('Error: AI'..myTeam()..': There is an imposter amongus')
 			end
 		end,
 
@@ -1232,7 +1249,7 @@ AmongusPath =
   AntiPause = {
     Before = {
       Update = function ()
-        EnablePauseMenu(false)
+        --EnablePauseMenu(false)
       end,
   
       OnGameResult = function ()
