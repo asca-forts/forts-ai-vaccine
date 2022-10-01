@@ -44,5 +44,5 @@ Fort =
 { Type = CREATE_NODE, OriginalNodeAId = 10005, PosA = { x = -4158.21, y = 907.91 }, OriginalNodeBId = 10006, NewNodePos = { x = -4159.83, y = 1050.00 }, MaterialSaveName = "backbracing", ReactorAngle = 0.01547, Foundation = true },
 { Type = CREATE_NODE, OriginalNodeAId = 10005, PosA = { x = -4158.43, y = 908.14 }, OriginalNodeBId = 10007, NewNodePos = { x = -4273.73, y = 908.13 }, MaterialSaveName = "backbracing", ReactorAngle = 0.01557, Foundation = false },
 { Type = CREATE_LINK, OriginalNodeAId = 10006, PosA = { x = -4159.83, y = 1050.00 }, OriginalNodeBId = 10007, PosB = { x = -4273.73, y = 908.13 }, MaterialSaveName = "backbracing", ReactorAngle = 0.01557, Foundation = false },
-{ Type = CREATE_NODE, OriginalNodeAId = 10007, PosA = { x = -4273.73, y = 908.13 }, OriginalNodeBId = 10008, NewNodePos = { x = -4275.14, y = 1050.00 }, 
+{ Type = CREATE_NODE, OriginalNodeAId = 10007, PosA = { x = -4273.73, y = 908.13 }, OriginalNodeBId = 10008, NewNodePos = { x = -4275.14, y = 1050.00 },}
 }
