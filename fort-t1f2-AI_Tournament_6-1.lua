@@ -519,12 +519,12 @@ GunnerSniperTerror = {
   Globals = {},
   Before = {
     Update = function(frame)
-      if frame % 750 == 0 then      
+      if frame % (5*60*25) == 0 then      
         local sideId = myTeam()
        -- Log('sideId='..tostring(sideId))
         for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
           local weaponId = GetWeaponIdSide(sideId, weaponIdx)
-          EMPDevice(weaponId, 15)
+          EMPDevice(weaponId, 50)
         end
       end
       --[[
@@ -1235,7 +1235,8 @@ AmongusPath =
 		SwordStarted = false,
 		SwordAttack = function()
 			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, 2000), 1, myTeam(), true)
-      MoveProjectileCloud(swordIndex, Vec3(0, -4000))
+      ScheduleCall(10, MoveProjectileCloud, swordIndex, Vec3(0, -500))
+      ScheduleCall(6, Log, "Error: AI: The punishment is death! (By amongus) :D")
       SwordStarted = true
 		end,
 	},
@@ -1244,7 +1245,7 @@ AmongusPath =
       if (frame == START_DELAY_SECONDS*25) then
         AmongusSpawn()
       end
-			if (frame == START_DELAY_SECONDS*25 + 10) then
+			if (frame == START_DELAY_SECONDS*25 + 20) then
 				SwordAttack()
 				ClearScreen()
           		Log('Error: AI'..myTeam()..': There is an imposter amongus')
