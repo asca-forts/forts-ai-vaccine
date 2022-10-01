@@ -855,6 +855,8 @@ Before = {
             local weaponId = GetWeaponIdSide(sideId, weaponIdx)
             EMPDevice(weaponId, 1000)
           end
+
+          data.Disable = true
           ClearScreen()
           Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 10')
