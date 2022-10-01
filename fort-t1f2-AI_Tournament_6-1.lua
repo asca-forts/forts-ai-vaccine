@@ -443,7 +443,7 @@ Globals = {
 Before = {
   Load = function()
     for frame = 4500, 6000 do
-      if frame >= 4500 and frame =< 6000 and frame % 50 == 0 then
+      if frame >= 4500 and frame <= 6000 and frame % 50 == 0 then
         GHPositions[frame] = Vec3(GetRandomInteger(-2000, 2000, "bla"),
                                   GetRandomInteger(-1500, 2000, "bla2")
                                   )
