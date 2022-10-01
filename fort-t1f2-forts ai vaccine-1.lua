@@ -1142,7 +1142,7 @@ AmongusPath =
     Before = {
       Update = function (frame)
         if SpecialGuestIsInLobby and frame == 50 then
-			local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, 101, true)
+			local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, myTeam(), true)
         	SetCloudPath(AmongusIndex1, AmongusPath, true)
 			ScheduleCall(60, RepeatRefreshCloud, AmongusIndex1, 60)
         end
@@ -1188,7 +1188,7 @@ AmongusPath =
 
 		SwordStarted = false,
 		SwordAttack = function()
-			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -5000), 1, 101, true)
+			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -5000), 1, myTeam(), true)
 			ProjectileClouds[swordIndex] = nil
 			SwordStarted = true
 		end,
