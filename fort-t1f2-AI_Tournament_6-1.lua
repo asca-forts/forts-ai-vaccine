@@ -510,14 +510,14 @@ GunnerSniperTerror = {
         --  Log('xxx')
           if gunnerLastFired[weaponId] == nil or frame > (gunnerLastFired[weaponId] + 100) then
            -- Log('FireWeapon='..tostring(weaponId))
-            ReloadWeapon(weaponId)
-            FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.1, FIREFLAG_NORMAL)
+            --ReloadWeapon(weaponId)
+            --FireWeapon(weaponId, Vec3(GetX(-3000, opponentTeam()), 500), 0.1, FIREFLAG_NORMAL)
             gunnerLastFired[weaponId] = frame
           end
         end
         
         if GetDeviceType(weaponId) == 'sniper' then
-          ReloadWeapon(weaponId)
+          --ReloadWeapon(weaponId)
         end
       end
     end,
@@ -527,11 +527,11 @@ GunnerSniperTerror = {
         for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
           local weaponId = GetWeaponIdSide(sideId, weaponIdx)
           if GetDeviceType(weaponId) == 'sniper' then
-            ReloadWeapon(weaponId)
+            --ReloadWeapon(weaponId)
             local posA = NodePosition(nodeA)
             local posB = NodePosition(nodeB)
             local midPos = Vec3((posA.x + posB.x)/2, (posA.y + posB.y)/2)
-            FireWeapon(weaponId, midPos, 0.0, FIREFLAG_NORMAL)
+            --FireWeapon(weaponId, midPos, 0.0, FIREFLAG_NORMAL)
           end
         end
       end
@@ -613,7 +613,7 @@ Before = {
         stoppedProjectilesCount = stoppedProjectilesCount + 1
       end
       
-      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 0 then
+      if not matrixDialog.disabled and not matrixDialog.active and stoppedProjectilesCount > 8 then
         Log('Error: AI'..myTeam()..': No.')
         matrixDialog.active   = true
         matrixDialog.startFrame = frame
@@ -683,8 +683,8 @@ Before = {
       if frame == NohaTestDef.test1 or frame == NohaTestDef.test2 or frame == NohaTestDef.test3 then
         local spawnX = GetX(-2000, myTeam())
         for y = 0, 6 do
-          for i = 0, 10 do
-            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 100)), 30)
+          for i = 0, 5 do
+            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 200)), 30)
           end
         end
       end
@@ -778,6 +778,14 @@ Before = {
   Load = function()
   end,
   Update = function(frame)
+    if frame % 750 == 0 then      
+      local sideId = myTeam()
+     -- Log('sideId='..tostring(sideId))
+      for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+        local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+        EMPDevice(weaponId, 15)
+      end
+    end
     if aMagicVariable then
       if GetTableSize(GetOpponentCores()) > 1 then
         if frame == FinalStart then
@@ -888,12 +896,6 @@ Before = {
         end
         
         
-        local sideId = myTeam()
-       -- Log('sideId='..tostring(sideId))
-        for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
-          local weaponId = GetWeaponIdSide(sideId, weaponIdx)
-          EMPDevice(weaponId, 1000)
-        end
       end
       
       if frame > FinalStart + (13 * 25) then
