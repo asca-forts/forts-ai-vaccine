@@ -1238,11 +1238,11 @@ AmongusPath =
     },
     Before = {
       Update = function ()
-        EnablePauseMenu(false)
+        --EnablePauseMenu(false)
       end,
   
       OnGameResult = function ()
-        EnablePauseMenu(true)
+        --EnablePauseMenu(true)
       end
     }
     },
