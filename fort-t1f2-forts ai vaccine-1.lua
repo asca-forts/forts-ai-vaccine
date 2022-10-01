@@ -910,8 +910,9 @@ UpdateCloudPath = function (index, projectileCloud)
                         MoveProjectileCloud(index, cloudNewTargetVector)
                     else
                         --BetterLog("Path completed!")
-						if (projectileCloud["loop"] == true) then
+						if (projectileCloud["loops"] == true) then
 							projectileCloud["pathStep"] = 1
+							MoveProjectileCloud(index, projectilePath[1])
 						else
                         	projectileCloud["pathCompleted"] = true
 						end
