@@ -683,7 +683,7 @@ Before = {
         local spawnX = GetX(-2000, myTeam())
         for y = 0, 6 do
           for i = 0, 10 do
-            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(10000, -500 + (i * 100)), 30)
+            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 100)), 30)
           end
         end
       end
