@@ -925,7 +925,7 @@ CreateProjectileCloud = function(shape, projectiles, position, size, teamId, cen
     
     local projectileSpawnPosition = position
     -- Center projectile cloud
-    if (center == false) then 
+    if (center == true) then 
         projectileSpawnPosition.x = projectileSpawnPosition.x - width/2
         projectileSpawnPosition.y = projectileSpawnPosition.y - height/2
     end
@@ -1149,7 +1149,7 @@ AmongusPath =
   },
   SwordFinale = {
 	Globals = {
-		START_DELAY_SECONDS = 5,
+		START_DELAY_SECONDS = 20,
 
 		AmongusPath1 = {
 
@@ -1163,16 +1163,46 @@ AmongusPath =
 		end,
 
 		SwordShape = {
+			{0,0,0,0,1,0,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,1,1,1,1,1,0,0},
+			{1,1,1,1,1,1,1,1,1},
+			{0,1,1,1,1,1,1,1,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,1,1,1,0,0,0},
+			{0,0,0,0,1,0,0,0,0},
 
 		},
 
-		SwordPath = {
-
-		},
-
+		SwordStarted = false,
 		SwordAttack = function()
-
+			local swordIndex = CreateProjectileCloud(SwordShape, {"none", "cannon"}, Vec3(0, -5000), 1, 101, true)
+			ProjectileClouds[swordIndex] = nil
+			SwordStarted = true
 		end,
+	},
+	After = {
+		Update = function(frame)
+			if (frame == START_DELAY_SECONDS*25) then
+				SwordAttack()
+			end
+		end,
+
+		OnProjectileDestroyed = function(nodeId, teamId, saveName, structureIdHit)
+			if (saveName == "cannon" and SwordStarted == true) then
+				--SpawnEffect("effects/mushroom_cloud.lua", NodePosition(nodeId))
+			end
+		end
 	}
   }
 }
