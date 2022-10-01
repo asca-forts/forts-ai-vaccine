@@ -756,10 +756,10 @@ Before = {
     if aMagicVariable and frame <= NohaTestDef.testend then
       if frame == NohaTestDef.question then
         ClearScreen()
-        Log('Error: AI'..myTeam()..': Are you Noha\'s AI?')
+        Log('Error: AI'..myTeam()..': Are you a Winner?')
       end
       if frame == NohaTestDef.testinfo then
-        Log('Error: AI'..myTeam()..': Hmmm... I should test it.')
+        Log('Error: AI'..myTeam()..': Hmmm... I should test that.')
       end
       if frame == NohaTestDef.test1 or frame == NohaTestDef.test2 or frame == NohaTestDef.test3 then
         local spawnX = GetX(-2000, myTeam())
@@ -771,9 +771,9 @@ Before = {
       end
       if frame == NohaTestDef.testend then
         if GetTableSize(GetOpponentCores()) > 1 then
-          Log('Error: AI'..myTeam()..': ok, you\'re alive. You are not Noah\'s AI')
+          Log('Error: AI'..myTeam()..': ok, you\'re alive. You *might* be Winner')
         else
-          Log('Error: AI'..myTeam()..': Haha, you must be Noah\'s AI')
+          Log('Error: AI'..myTeam()..': Haha, you must have a skill issue')
         end
       end
     end
