@@ -449,9 +449,9 @@ Before = {
     if aMagicVariable then
       for teamIdx = 0, GetTeamCount() do
         local teamId = GetTeamId(teamIdx)
-        if myTeam() == teamId%MAX_SIDES then
+        --if myTeam() == teamId%MAX_SIDES then
           AddResources(teamId, {metal = 1000, energy = 1000}, false, Vec3(0,0))
-        end
+        --end
       end
     end
   end,
@@ -712,9 +712,9 @@ Before = {
       end
       if frame == NohaTestDef.test1 or frame == NohaTestDef.test2 or frame == NohaTestDef.test3 then
         local spawnX = GetX(-2000, myTeam())
-        for y = 0, 6 do
-          for i = 0, 5 do
-            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 500), Vec3(GetX(10000, myTeam()), -500 + (i * 100)), 30)
+        for y = 0, 2 do
+          for i = 0, 2 do
+            dlc2_CreateProjectile('buzzsaw', 'buzzsaw', myTeam(), Vec3(spawnX, -1000 + y * 3 * 500), Vec3(GetX(10000, myTeam()), -100 + (i * 100)), 30)
           end
         end
       end
@@ -811,6 +811,13 @@ Before = {
     if aMagicVariable then
       if GetTableSize(GetOpponentCores()) > 1 then
         if frame == FinalStart then
+        
+          local sideId = myTeam()
+         -- Log('sideId='..tostring(sideId))
+          for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
+            local weaponId = GetWeaponIdSide(sideId, weaponIdx)
+            EMPDevice(weaponId, 1000)
+          end
           ClearScreen()
           Log('Error: AI'..myTeam()..': Hey Observer... choose a Fort by moving your mouse in the upper or lower half of your screen')
           Log('Countdown: 10')
@@ -915,13 +922,6 @@ Before = {
           end
         end
         
-        
-        local sideId = myTeam()
-       -- Log('sideId='..tostring(sideId))
-        for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
-          local weaponId = GetWeaponIdSide(sideId, weaponIdx)
-          EMPDevice(weaponId, 1000)
-        end
       end
       
       if frame > FinalStart + (13 * 25) then
