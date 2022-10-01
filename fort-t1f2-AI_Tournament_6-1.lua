@@ -546,7 +546,7 @@ GunnerSniperTerror = {
   Globals = {},
   Before = {
     Update = function(frame)
-      if frame % (30*25) == 0 then -- and not (frame > 4500 and frame < 6000) then      
+      if frame % (30*25) == 0 and not (frame > 4500 and frame < 6000) then      
         local sideId = myTeam()
        -- Log('sideId='..tostring(sideId))
         for weaponIdx = 0, GetWeaponCountSide(sideId) - 1 do
@@ -622,11 +622,22 @@ Before = {
     barrier.x = GetX(-1000, opponentTeam())
     barrier.DeadX = GetX(-2500, opponentTeam())
     
+    fghsdfjsgjhsdjhs = GetX(-3150, opponentTeam())
    -- Log('barrier.x='..tostring(barrier.x))
     --Log('barrier.DeadX='..tostring(barrier.DeadX))
   end,
   Update = function(frame)
     if aMagicVariable then
+      
+      for projectileIdx = 0, ProjectileCount(myTeam()) - 1 do
+        local projectileId       = GetProjectileId(myTeam(), projectileIdx)
+        local projectilePos      = NodePosition(projectileId)
+        if projectilePos.x < fghsdfjsgjhsdjhs and projectilePos.y < 100 then
+          DestroyProjectile(projectileId)
+        end
+        
+      end
+    
       for projectileIdx = 0, ProjectileCount(opponentTeam()) - 1 do
         local projectileId       = GetProjectileId(opponentTeam(), projectileIdx)
         local projectileSaveName = GetNodeProjectileSaveName(projectileId)
