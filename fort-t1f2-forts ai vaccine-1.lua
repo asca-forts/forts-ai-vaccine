@@ -1100,9 +1100,9 @@ AmongusPath =
     Before = {
       Update = function (frame)
         if SpecialGuestIsInLobby and frame == 50 then
-          TestIndex = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, 101, true)
-          SetCloudPath(TestIndex, AmongusPath, true)
-		  ScheduleCall(60, RepeatRefreshCloud, index, 60)
+			local AmongusIndex1 = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, 101, true)
+        	SetCloudPath(AmongusIndex1, AmongusPath, true)
+			ScheduleCall(60, RepeatRefreshCloud, AmongusIndex1, 60)
         end
       end
     }
@@ -1119,10 +1119,22 @@ AmongusPath =
 		},
 		
 		AmongusSpawn = function()
-			
+
 		end,
-	},
-  },
+
+		SwordShape = {
+
+		},
+
+		SwordPath = {
+
+		},
+
+		SwordAttack = function()
+
+		end,
+	}
+  }
 }
 
 --------------------------------------------------------Modules End--------------------------------------------------------
@@ -1155,28 +1167,34 @@ end
 function VaccinateModules()
     local eventCallbacks = {}
     for name, module in pairs(Modules) do
-        for globalName, globalValue in pairs(module.Globals) do
-            _G[globalName] = globalValue
-        end
-        for functionName, functionValue in pairs(module["Before"]) do
-            if (eventCallbacks[functionName] == nil) then
-                eventCallbacks[functionName] = {}
-            end
-            if (eventCallbacks[functionName]["Before"] == nil) then
-                eventCallbacks[functionName]["Before"] = {}
-            end
-            -- Insert at the start of the table, so module's callbacks get layered like an onion
-            table.insert(eventCallbacks[functionName]["Before"], 1, functionValue)
-        end
-        for functionName, functionValue in pairs(module["After"]) do
-            if (eventCallbacks[functionName] == nil) then
-                eventCallbacks[functionName] = {}
-            end
-            if (eventCallbacks[functionName]["After"] == nil) then
-                eventCallbacks[functionName]["After"] = {}
-            end
-            table.insert(eventCallbacks[functionName]["After"], functionValue)
-        end
+		if (module["Globals"] ~= nil) then
+        	for globalName, globalValue in pairs(module.Globals) do
+            	_G[globalName] = globalValue
+        	end
+		end
+		if (module["Before"] ~= nil) then
+			for functionName, functionValue in pairs(module["Before"]) do
+				if (eventCallbacks[functionName] == nil) then
+					eventCallbacks[functionName] = {}
+				end
+				if (eventCallbacks[functionName]["Before"] == nil) then
+					eventCallbacks[functionName]["Before"] = {}
+				end
+				-- Insert at the start of the table, so module's callbacks get layered like an onion
+				table.insert(eventCallbacks[functionName]["Before"], 1, functionValue)
+			end
+		end
+		if (module["After"] ~= nil) then
+			for functionName, functionValue in pairs(module["After"]) do
+				if (eventCallbacks[functionName] == nil) then
+					eventCallbacks[functionName] = {}
+				end
+				if (eventCallbacks[functionName]["After"] == nil) then
+					eventCallbacks[functionName]["After"] = {}
+				end
+				table.insert(eventCallbacks[functionName]["After"], functionValue)
+			end
+		end
     end
 	--Log("Registering")
     RegisterVaccinationCallbacks(eventCallbacks)
