@@ -802,7 +802,7 @@ After = {},
 
     Final = { -- issue #10
 Globals = {
-  FinalStart = 0.3 * 60 * 25, -- in seconds
+  FinalStart = 7 * 60 * 25, -- in seconds
 },
 Before = {
   Load = function()
@@ -1198,7 +1198,7 @@ AmongusPath =
   },
   SwordFinale = {
 	Globals = {
-		START_DELAY_SECONDS = (0.6*60),
+		START_DELAY_SECONDS = (7*60),
 
 		AmongusPath1 = {
       {500, 500},
