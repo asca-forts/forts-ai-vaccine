@@ -885,6 +885,23 @@ SetCloudPath = function (index, projectilePath, loops)
     MoveProjectileCloud(index, Vec3(projectilePath[1][1], projectilePath[1][2]))
 end,
 
+RefreshCloud = function (index)
+	local projectileCloud = ProjectileClouds[index]
+	for projectileIndex, projectileId in ipairs(projectileCloud["indexs"]) do
+		if NodeExists(projectileId) == true then
+			local newProjectileIndex = dlc2_CreateProjectile(GetNodeProjectileSaveName(projectileId), "", NodeTeam(projectileId), NodePosition(projectileId), Vec3(0,-100), 10000)
+			projectileIds[projectileIndex] = newProjectileIndex
+		end
+	end
+end,
+
+RepeatRefreshCloud = function (index, frequency)
+	if (ProjectileClouds[index] ~= nil) then
+		RefreshCloud(index)
+		ScheduleCall(frequency, RepeatRefreshCloud, index, frequency)
+	end
+end,
+
 UpdateCloudPath = function (index, projectileCloud)
     if (projectileCloud["pathCompleted"] == false) then
         
@@ -950,27 +967,31 @@ AmongusPath =
         },
         {
             -940,
-            -5585,
+            -7180,
         },
         {
             -600,
-            -3384.9995117188,
+            -7000,
         },
         {
             130,
-            -1984.2133789063,
+            -7300,
         },
         {
             1375,
-            -140.34130859375,
+            -6900,
         },
         {
             2500,
-            1029.6586914063,
+            -7180,
         },
         {
-            2626.7998046875,
-            1333.1068115234,
+            130,
+            -7300,
+        },
+		{
+            -940,
+            -7180,
         },
 }
     },
@@ -985,12 +1006,9 @@ AmongusPath =
     Before = {
       Update = function (frame)
         if SpecialGuestIsInLobby and frame == 50 then
-          -- local pos = -2500
-          -- for i = 1, 10, 1 do
-          --     CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(pos + i * 300,500), 1, 101, true)
-          -- end
           TestIndex = CreateProjectileCloud(AmongusShape, {"none", "cannon"}, Vec3(-1110, -7180), 1, 101, true)
           SetCloudPath(TestIndex, AmongusPath, true)
+		  ScheduleCall(60, RepeatRefreshCloud, index, 60)
         end
       end
     }
